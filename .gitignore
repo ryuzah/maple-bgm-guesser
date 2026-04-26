@@ -1,10 +1,18 @@
 # Exclude the bgm_files folder
 bgm_files/
 
-# Common Python cache files
+# Exclude all Python files and related files
+*.py
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Exclude backup and data files
+*.json
+songs_metadata_backup*
+
+# Exclude development and test files
+test_*
 
 # Virtual environments
 venv/
