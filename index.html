@@ -824,14 +824,32 @@
         }
 
         function loadDailyData() {
+            console.log('=== LOAD DAILY DATA ===');
             const stored = localStorage.getItem('mapleBgmDailyData');
-            console.log('Loading daily data from localStorage:', stored);
+            console.log('Raw localStorage data:', stored);
             if (stored) {
-                gameState.dailyData = JSON.parse(stored);
-                console.log('Parsed daily data:', gameState.dailyData);
+                try {
+                    gameState.dailyData = JSON.parse(stored);
+                    console.log('Successfully parsed daily data:', gameState.dailyData);
+                } catch (error) {
+                    console.error('Error parsing daily data:', error);
+                    gameState.dailyData = {
+                        classic_easy: null,
+                        classic_hard: null,
+                        all_easy: null,
+                        all_hard: null
+                    };
+                }
             } else {
-                console.log('No daily data found in localStorage');
+                console.log('No daily data found in localStorage, initializing empty');
+                gameState.dailyData = {
+                    classic_easy: null,
+                    classic_hard: null,
+                    all_easy: null,
+                    all_hard: null
+                };
             }
+            console.log('Final gameState.dailyData after load:', gameState.dailyData);
         }
 
         function saveDailyData() {
@@ -1115,14 +1133,18 @@
                 
         // Initialize game
         async function init() {
+            console.log('=== INITIALIZING GAME ===');
+            console.log('Initial gameState.dailyData:', gameState.dailyData);
             await loadSongs();
+            console.log('After loadSongs, gameState.dailyData:', gameState.dailyData);
             loadDailyData();
+            console.log('After loadDailyData, gameState.dailyData:', gameState.dailyData);
             document.getElementById('highScore').textContent = getCurrentHighScore();
             initVolumeControl();
             initNightMode();
             
-            // Reset daily seed to force regeneration
-            resetDailySeed();
+            // Don't reset daily seed - this was clearing saved progress!
+            // resetDailySeed();
         }
 
         function selectSongCount(count) {
