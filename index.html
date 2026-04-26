@@ -862,19 +862,8 @@
             const today = getUTCToday();
             let data = gameState.dailyData[dailyKey];
             
-            // If no data for today or data is from yesterday, generate new game
-            if (!data || data.date !== today) {
-                // Preserve existing progress if it exists
-                const existingProgress = data ? {
-                    hasProgress: data.hasProgress,
-                    currentScore: data.currentScore,
-                    attempts: data.attempts,
-                    currentRound: data.currentRound,
-                    currentGuess: data.currentGuess,
-                    hasGuessedCorrectly: data.hasGuessedCorrectly,
-                    completed: data.completed
-                } : null;
-                
+            // Only generate new game if no data exists (don't recreate if data exists but date is different)
+            if (!data) {
                 const [mode, difficulty] = dailyKey.split('_');
                 const seed = today + '_' + dailyKey;
                 const random = seededRandom(seed);
@@ -897,13 +886,13 @@
                     completed: false,
                     score: 0,
                     attempts: [],
-                    // Save state fields - preserve existing progress
-                    hasProgress: existingProgress?.hasProgress || false,
-                    currentScore: existingProgress?.currentScore || 0,
-                    attempts: existingProgress?.attempts || [],
-                    currentRound: existingProgress?.currentRound || 1,
-                    currentGuess: existingProgress?.currentGuess || 1,
-                    hasGuessedCorrectly: existingProgress?.hasGuessedCorrectly || false
+                    // Save state fields
+                    hasProgress: false,
+                    currentScore: 0,
+                    attempts: [],
+                    currentRound: 1,
+                    currentGuess: 1,
+                    hasGuessedCorrectly: false
                 };
                 
                 gameState.dailyData[dailyKey] = data;
