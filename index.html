@@ -858,10 +858,7 @@
             
             // If no data for today or data is from yesterday, generate new game
             if (!data || data.date !== today) {
-                // Parse mode and difficulty from dailyKey (format: "mode_difficulty")
                 const [mode, difficulty] = dailyKey.split('_');
-                
-                // Generate deterministic daily game based on date, mode, and difficulty
                 const seed = today + '_' + dailyKey;
                 const random = seededRandom(seed);
                 
@@ -873,18 +870,20 @@
                     );
                 }
                 
-                // Select one song using seeded random
+                // Select random song
                 const songIndex = Math.floor(random() * availableSongs.length);
                 const selectedSong = availableSongs[songIndex];
                 
                 data = {
                     date: today,
-                    mode: mode,
-                    difficulty: difficulty,
                     song: selectedSong,
                     completed: false,
                     score: 0,
-                    attempts: []
+                    attempts: [],
+                    // Save state fields
+                    hasProgress: false,
+                    currentScore: 0,
+                    hasGuessedCorrectly: false
                 };
                 
                 gameState.dailyData[dailyKey] = data;
@@ -892,6 +891,24 @@
             }
             
             return data;
+        }
+        
+        function saveDailyProgress(dailyKey) {
+            const dailyGame = gameState.dailyData[dailyKey];
+            if (!dailyGame) return;
+            
+            // Save current progress
+            dailyGame.hasProgress = true;
+            dailyGame.currentScore = gameState.score;
+            dailyGame.hasGuessedCorrectly = gameState.guessHistory.length > 0 && 
+                                        gameState.guessHistory[gameState.guessHistory.length - 1].correct;
+            
+            saveDailyData();
+        }
+        
+        function hasDailyProgress(dailyKey) {
+            const dailyGame = gameState.dailyData[dailyKey];
+            return dailyGame && dailyGame.hasProgress && !dailyGame.completed;
         }
 
         function seededRandom(seed) {
@@ -1090,12 +1107,28 @@
             gameState.guessedSongs = [dailyGame.song];
             gameState.currentSongIndex = 0;
             gameState.currentRound = 1;
-            gameState.score = 0;
+            
+            // Check if there's existing progress to resume
+            if (hasDailyProgress(dailyKey)) {
+                // Resume from saved progress
+                gameState.score = dailyGame.currentScore;
+                gameState.guessHistory = dailyGame.attempts;
+                
+                // If already guessed correctly, show results
+                if (dailyGame.hasGuessedCorrectly) {
+                    showDailyResults(dailyKey);
+                    return;
+                }
+            } else {
+                // Start fresh
+                gameState.score = 0;
+                gameState.guessHistory = [];
+            }
             
             // Update UI
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('currentScore').textContent = '0';
+            document.getElementById('currentScore').textContent = gameState.score;
             document.getElementById('highScore').textContent = getCurrentHighScore();
             
             // Update game mode indicator
@@ -1112,6 +1145,11 @@
             // Update song counter display
             document.getElementById('totalSongs').textContent = '1';
             document.getElementById('currentSongNumber').textContent = '1';
+            
+            // Restore guess history if resuming
+            if (gameState.guessHistory && gameState.guessHistory.length > 0) {
+                updateGuessHistory();
+            }
             
             // Start first song
             loadCurrentSong();
@@ -1660,6 +1698,12 @@
             // Add guess to history with correct type
             const historyType = correct ? 'correct' : guessType;
             updateGuessHistory(guess, historyType);
+            
+            // Save progress for daily mode
+            if (gameState.isDaily) {
+                const dailyKey = `${gameState.gameMode}_${gameState.difficulty}`;
+                saveDailyProgress(dailyKey);
+            }
             
             if (correct) {
                 const points = gameState.roundPoints[gameState.currentRound - 1];
