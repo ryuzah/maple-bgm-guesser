@@ -900,6 +900,7 @@
             // Save current progress
             dailyGame.hasProgress = true;
             dailyGame.currentScore = gameState.score;
+            dailyGame.attempts = gameState.guessHistory;
             dailyGame.hasGuessedCorrectly = gameState.guessHistory.length > 0 && 
                                         gameState.guessHistory[gameState.guessHistory.length - 1].correct;
             
