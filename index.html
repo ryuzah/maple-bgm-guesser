@@ -941,22 +941,15 @@
             // Update volume slider
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeValue = document.getElementById('volumeValue');
-            const volumeIcon = document.getElementById('volumeIcon');
             
             volumeSlider.value = Math.round(gameState.volume * 100);
             volumeValue.textContent = Math.round(gameState.volume * 100) + '%';
-            
-            // Update volume icon based on level
-            updateVolumeIcon(gameState.volume);
             
             // Add event listener for volume slider
             volumeSlider.oninput = function() {
                 const volume = this.value / 100;
                 gameState.volume = volume;
                 volumeValue.textContent = this.value + '%';
-                
-                // Update volume icon
-                updateVolumeIcon(volume);
                 
                 // Save volume
                 localStorage.setItem('mapleBgmVolume', this.value);
@@ -991,9 +984,6 @@
             if (savedVolume !== null) {
                 gameState.volume = parseFloat(savedVolume) / 100;
             }
-            
-            // Update volume icon
-            updateVolumeIcon(gameState.volume);
         }
         
         // Night mode functions
