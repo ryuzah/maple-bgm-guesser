@@ -857,6 +857,7 @@
             let data = gameState.dailyData[dailyKey];
             
             // If no data for today or data is from yesterday, generate new game
+            // But only if it's not already completed for today
             if (!data || data.date !== today) {
                 // Parse mode and difficulty from dailyKey (format: "mode_difficulty")
                 const [mode, difficulty] = dailyKey.split('_');
@@ -877,6 +878,7 @@
                 const songIndex = Math.floor(random() * availableSongs.length);
                 const selectedSong = availableSongs[songIndex];
                 
+                // Create new data object for today
                 data = {
                     date: today,
                     mode: mode,
@@ -1072,7 +1074,12 @@
             gameState.songCount = 1; // Daily mode uses 1 song
             
             const dailyKey = `${mode}_${difficulty}`;
-            if (isDailyCompleted(dailyKey)) {
+            
+            // Check if daily is already completed before getting/creating game data
+            const today = getUTCToday();
+            const existingData = gameState.dailyData[dailyKey];
+            
+            if (existingData && existingData.date === today && existingData.completed) {
                 showDailyResults(dailyKey);
             } else {
                 startDailyGame(dailyKey);
