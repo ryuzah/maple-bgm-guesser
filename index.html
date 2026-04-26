@@ -168,11 +168,22 @@
 
         <!-- Game Screen -->
         <div id="gameScreen" class="hidden">
-            <!-- Settings Button -->
-            <button onclick="openSettingsModal()" 
-                    class="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition">
-                <i class="fas fa-cog text-gray-600 text-lg"></i>
-            </button>
+            <!-- Volume Control -->
+            <div class="fixed top-4 right-4 z-50">
+                <button id="volumeIconButton" onclick="toggleVolumeSlider()" 
+                        class="bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition">
+                    <i id="volumeIcon" class="fas fa-volume-up text-gray-600 text-lg"></i>
+                </button>
+                <div id="volumeSliderContainer" class="hidden bg-white rounded-lg shadow-lg p-3 border border-gray-200 mt-2">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-volume-down text-gray-500 text-sm"></i>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="70" 
+                               class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <i class="fas fa-volume-up text-gray-500 text-sm"></i>
+                        <span id="volumeValue" class="text-sm text-gray-600 w-10 text-right">70%</span>
+                    </div>
+                </div>
+            </div>
             
             <!-- Score and Progress -->
             <div class="flex justify-between items-center mb-6">
@@ -428,49 +439,7 @@
             </div>
         </div>
 
-        <!-- Settings Modal -->
-        <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 max-w-md mx-4 w-full">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                    <i class="fas fa-cog text-gray-600 mr-2"></i>
-                    Settings
-                </h2>
-                
-                <!-- Audio Settings -->
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">
-                        <i class="fas fa-volume-up text-gray-600 mr-2"></i>
-                        Audio Settings
-                    </h3>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Master Volume
-                        </label>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-volume-down text-gray-500"></i>
-                            <input type="range" id="settingsVolumeSlider" min="0" max="100" value="70" 
-                                   class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                            <i class="fas fa-volume-up text-gray-500"></i>
-                            <span id="settingsVolumeValue" class="text-sm text-gray-600 w-12 text-right">70%</span>
-                        </div>
-                    </div>
-                
-                <!-- Action Buttons -->
-                <div class="mt-6 flex space-x-3">
-                    <button onclick="saveSettings()" 
-                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition">
-                        <i class="fas fa-save mr-2"></i>
-                        Save Settings
-                    </button>
-                    <button onclick="closeSettingsModal()" 
-                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition">
-                        <i class="fas fa-times mr-2"></i>
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-
+        
     <script>
         // Game state
         let gameState = {
@@ -669,46 +638,48 @@
             return { hours, minutes, seconds };
         }
 
-        // Settings modal functions
-        function openSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.remove('hidden');
+        // Volume control functions
+        function toggleVolumeSlider() {
+            const sliderContainer = document.getElementById('volumeSliderContainer');
+            const isHidden = sliderContainer.classList.contains('hidden');
             
-            // Load current settings into the modal
-            loadSettingsIntoModal();
-        }
-        
-        function closeSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.add('hidden');
-        }
-        
-        function loadSettingsIntoModal() {
-            // Load saved settings
-            const savedSettings = localStorage.getItem('mapleBgmSettings');
-            if (savedSettings) {
-                gameState.settings = JSON.parse(savedSettings);
+            if (isHidden) {
+                sliderContainer.classList.remove('hidden');
+                loadVolumeSettings();
+            } else {
+                sliderContainer.classList.add('hidden');
             }
-            
+        }
+        
+        function loadVolumeSettings() {
             // Load saved volume
             const savedVolume = localStorage.getItem('mapleBgmVolume');
             if (savedVolume !== null) {
                 gameState.volume = parseFloat(savedVolume) / 100;
             }
             
-            // Update modal elements
-            const volumeSlider = document.getElementById('settingsVolumeSlider');
-            const volumeValue = document.getElementById('settingsVolumeValue');
+            // Update volume slider
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const volumeIcon = document.getElementById('volumeIcon');
             
             volumeSlider.value = Math.round(gameState.volume * 100);
             volumeValue.textContent = Math.round(gameState.volume * 100) + '%';
             
-                        
+            // Update volume icon based on level
+            updateVolumeIcon(gameState.volume);
+            
             // Add event listener for volume slider
             volumeSlider.oninput = function() {
                 const volume = this.value / 100;
                 gameState.volume = volume;
                 volumeValue.textContent = this.value + '%';
+                
+                // Update volume icon
+                updateVolumeIcon(volume);
+                
+                // Save volume
+                localStorage.setItem('mapleBgmVolume', this.value);
                 
                 // Update current audio volume if playing
                 if (gameState.currentAudio && gameState.currentAudio.volume !== undefined) {
@@ -722,56 +693,36 @@
             };
         }
         
-        function saveSettings() {
-            // Save volume
-            const volumeSlider = document.getElementById('settingsVolumeSlider');
-            const volume = volumeSlider.value / 100;
-            gameState.volume = volume;
-            localStorage.setItem('mapleBgmVolume', volumeSlider.value);
+        function updateVolumeIcon(volume) {
+            const volumeIcon = document.getElementById('volumeIcon');
             
-                        
-            // Apply settings immediately
-            applySettings();
-            
-            // Show feedback and close modal
-            showFeedback('Settings saved successfully!', 'success');
-            closeSettingsModal();
+            if (volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute text-gray-600 text-lg';
+            } else if (volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down text-gray-600 text-lg';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up text-gray-600 text-lg';
+            }
         }
         
-        function applySettings() {
-            // Apply volume to current audio
-            if (gameState.currentAudio && gameState.currentAudio.volume !== undefined) {
-                gameState.currentAudio.volume = gameState.volume;
-            }
-            
-            // Apply volume to YouTube player
-            if (youtubePlayer && youtubePlayer.setVolume) {
-                youtubePlayer.setVolume(Math.round(gameState.volume * 100));
-            }
-            
-            // Apply other settings as needed
-            // (Additional settings can be applied here)
-        }
-        
-        function initSettings() {
-            // Load saved settings on initialization
-            const savedSettings = localStorage.getItem('mapleBgmSettings');
-            if (savedSettings) {
-                gameState.settings = JSON.parse(savedSettings);
-            }
-            
+        function initVolumeControl() {
+            // Load saved volume on initialization
             const savedVolume = localStorage.getItem('mapleBgmVolume');
             if (savedVolume !== null) {
                 gameState.volume = parseFloat(savedVolume) / 100;
             }
+            
+            // Update volume icon
+            updateVolumeIcon(gameState.volume);
         }
-        
+
+                
         // Initialize game
         async function init() {
             await loadSongs();
             loadDailyData();
             document.getElementById('highScore').textContent = getCurrentHighScore();
-            initSettings();
+            initVolumeControl();
             
             // Reset daily seed to force regeneration
             resetDailySeed();
