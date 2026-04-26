@@ -930,6 +930,12 @@
         }
         
         function saveDailyProgress(dailyKey) {
+            // Don't save if we're in the middle of resuming
+            if (gameState.isResuming) {
+                console.log('Skipping save during resume process');
+                return;
+            }
+            
             console.log('=== SAVE DAILY PROGRESS ===');
             console.log('Daily key:', dailyKey);
             console.log('Current gameState:', {
@@ -937,7 +943,8 @@
                 guessHistoryLength: gameState.guessHistory.length,
                 currentRound: gameState.currentRound,
                 currentGuess: gameState.currentGuess,
-                isDaily: gameState.isDaily
+                isDaily: gameState.isDaily,
+                isResuming: gameState.isResuming
             });
             
             const dailyGame = gameState.dailyData[dailyKey];
@@ -1203,6 +1210,9 @@
                     currentGuess: gameState.currentGuess
                 });
                 
+                // Set flag to prevent saving during resume
+                gameState.isResuming = true;
+                
                 // If already guessed correctly, show results
                 if (dailyGame.hasGuessedCorrectly) {
                     console.log('Daily game already completed, showing results');
@@ -1216,6 +1226,7 @@
                 gameState.guessHistory = [];
                 gameState.currentRound = 1;
                 gameState.currentGuess = 1;
+                gameState.isResuming = false;
             }
             
             // Update UI
@@ -1244,6 +1255,12 @@
                 updateGuessHistory();
                 updateRoundIndicators();
                 updateGuessDisplay();
+            }
+            
+            // Clear resume flag after game is fully loaded
+            if (gameState.isResuming) {
+                console.log('Clearing resume flag - game fully loaded');
+                gameState.isResuming = false;
             }
             
             // Start first song
