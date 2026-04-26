@@ -1096,15 +1096,7 @@
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('currentScore').textContent = '0';
-            
-            // Hide high score for daily mode, show for free play
-            const highScoreElement = document.getElementById('highScore').parentElement;
-            if (gameState.isDaily) {
-                highScoreElement.style.display = 'none';
-            } else {
-                highScoreElement.style.display = 'block';
-                document.getElementById('highScore').textContent = getCurrentHighScore();
-            }
+            document.getElementById('highScore').textContent = getCurrentHighScore();
             
             // Update game mode indicator
             const modeIndicator = document.getElementById('gameModeIndicator');
@@ -1237,15 +1229,7 @@
             updateNightModeButtonVisibility();
             
             document.getElementById('currentScore').textContent = '0';
-            
-            // Hide high score for daily mode, show for free play
-            const highScoreElement = document.getElementById('highScore').parentElement;
-            if (gameState.isDaily) {
-                highScoreElement.style.display = 'none';
-            } else {
-                highScoreElement.style.display = 'block';
-                document.getElementById('highScore').textContent = getCurrentHighScore();
-            }
+            document.getElementById('highScore').textContent = getCurrentHighScore();
             
             // Update game mode indicator
             const modeIndicator = document.getElementById('gameModeIndicator');
@@ -1864,21 +1848,10 @@
                 document.getElementById('gameOverScreen').classList.remove('hidden');
                 document.getElementById('finalScore').textContent = gameState.score;
                 
-                // Hide high score for daily mode, show for free play
-                const finalHighScoreElement = document.getElementById('finalHighScore').parentElement;
-                const newHighScoreElement = document.getElementById('newHighScore');
-                let currentHighScore = 0;
+                const currentHighScore = getCurrentHighScore();
+                document.getElementById('finalHighScore').textContent = currentHighScore;
                 
-                if (gameState.isDaily) {
-                    finalHighScoreElement.style.display = 'none';
-                    newHighScoreElement.style.display = 'none';
-                } else {
-                    finalHighScoreElement.style.display = 'block';
-                    currentHighScore = getCurrentHighScore();
-                    document.getElementById('finalHighScore').textContent = currentHighScore;
-                }
-                
-                if (!gameState.isDaily && gameState.score > currentHighScore) {
+                if (gameState.score > currentHighScore) {
                     // Update high score for current mode
                     const gameModePrefix = gameState.gameMode === 'oldschool' ? 'oldschool_' : '';
                     const modeKey = gameState.isUnlimited ? 
