@@ -117,12 +117,12 @@
                     <div class="space-y-2">
                         <button onclick="selectDailyMode('oldschool', 'easy')" class="bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition w-full">
                             <i class="fas fa-record-vinyl mr-2"></i>
-                            Daily Oldschool
+                            Daily Classic
                             <div class="text-sm mt-1 opacity-90">Easy Mode - Guess Region</div>
                         </button>
                         <button onclick="selectDailyMode('oldschool', 'hard')" class="bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg font-medium transition w-full">
                             <i class="fas fa-fire mr-2"></i>
-                            Daily Oldschool
+                            Daily Classic
                             <div class="text-sm mt-1 opacity-90">Hard Mode - Guess Song Name</div>
                         </button>
                     </div>
@@ -331,7 +331,7 @@
                     <ul class="list-disc list-inside ml-4 space-y-1">
                         <li>521+ MapleStory BGMs</li>
                         <li>Easy & Hard difficulty modes</li>
-                        <li>Oldschool & All Songs game modes</li>
+                        <li>Classic & All Songs game modes</li>
                         <li>Personal High score tracking</li>
                     </ul>
                     <div class="mt-2 p-3 bg-blue-50 rounded-lg">
@@ -354,7 +354,7 @@
                                - Comprehensive MapleStory music database</p>
                             <p>• <a href="https://www.maplewordle.com/" target="_blank" rel="noopener noreferrer" 
                                class="text-purple-600 hover:text-purple-800 underline">maplewordle.com</a> 
-                               - Oldschool BGM reference and inspiration</p>
+                               - Classic BGM reference and inspiration</p>
                         </div>
                     </div>
                     
@@ -389,7 +389,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="selectGameMode('oldschool')" class="bg-orange-500 hover:bg-orange-600 text-white py-4 px-6 rounded-lg font-medium transition">
                         <i class="fas fa-record-vinyl mr-2"></i>
-                        Oldschool Mode
+                        Classic Mode
                         <div class="text-sm mt-1 opacity-90">Classic MapleStory BGMs</div>
                     </button>
                     <button onclick="selectGameMode('all')" class="bg-blue-500 hover:bg-blue-600 text-white py-4 px-6 rounded-lg font-medium transition">
@@ -484,12 +484,12 @@
                 hard: parseInt(localStorage.getItem('mapleBgmHighScore_hard') || '0'),
                 easy_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_easy_unlimited') || '0'),
                 hard_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_hard_unlimited') || '0'),
-                oldschool_easy: parseInt(localStorage.getItem('mapleBgmHighScore_oldschool_easy') || '0'),
-                oldschool_hard: parseInt(localStorage.getItem('mapleBgmHighScore_oldschool_hard') || '0'),
-                oldschool_easy_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_oldschool_easy_unlimited') || '0'),
-                oldschool_hard_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_oldschool_hard_unlimited') || '0'),
-                daily_oldschool_easy: parseInt(localStorage.getItem('mapleBgmHighScore_daily_oldschool_easy') || '0'),
-                daily_oldschool_hard: parseInt(localStorage.getItem('mapleBgmHighScore_daily_oldschool_hard') || '0'),
+                classic_easy: parseInt(localStorage.getItem('mapleBgmHighScore_classic_easy') || '0'),
+                classic_hard: parseInt(localStorage.getItem('mapleBgmHighScore_classic_hard') || '0'),
+                classic_easy_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_classic_easy_unlimited') || '0'),
+                classic_hard_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_classic_hard_unlimited') || '0'),
+                daily_classic_easy: parseInt(localStorage.getItem('mapleBgmHighScore_daily_classic_easy') || '0'),
+                daily_classic_hard: parseInt(localStorage.getItem('mapleBgmHighScore_daily_classic_hard') || '0'),
                 daily_all_easy: parseInt(localStorage.getItem('mapleBgmHighScore_daily_all_easy') || '0'),
                 daily_all_hard: parseInt(localStorage.getItem('mapleBgmHighScore_daily_all_hard') || '0')
             },
@@ -499,8 +499,8 @@
             isDaily: false, // Track daily mode
             isUnlimited: false, // Track unlimited mode
             dailyData: {
-                oldschool_easy: null,
-                oldschool_hard: null,
+                classic_easy: null,
+                classic_hard: null,
                 all_easy: null,
                 all_hard: null
             }, // Track daily completion data
@@ -805,7 +805,7 @@
             const modeIndicator = document.getElementById('gameModeIndicator');
             const difficultyText = gameState.difficulty === 'easy' ? 'Easy' : 'Hard';
             if (gameState.gameMode === 'oldschool') {
-                modeIndicator.textContent = `📅 Daily Oldschool (${difficultyText})`;
+                modeIndicator.textContent = `📅 Daily Classic (${difficultyText})`;
                 modeIndicator.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800';
             } else {
                 modeIndicator.textContent = `📅 Daily All Songs (${difficultyText})`;
@@ -838,7 +838,7 @@
             }
             
             const timeUntilMidnight = getTimeUntilMidnight();
-            const modeText = dailyGame.mode === 'oldschool' ? 'Oldschool' : 'All Songs';
+            const modeText = dailyGame.mode === 'oldschool' ? 'Classic' : 'All Songs';
             const difficultyText = dailyGame.difficulty === 'easy' ? 'Easy' : 'Hard';
             
             dailyResultsScreen.innerHTML = `
@@ -935,7 +935,7 @@
             const difficultyText = gameState.difficulty === 'easy' ? 'Easy' : 'Hard';
             if (gameState.isDaily) {
                 if (gameState.gameMode === 'oldschool') {
-                    modeIndicator.textContent = `📅 Daily Oldschool (${difficultyText})`;
+                    modeIndicator.textContent = `📅 Daily Classic (${difficultyText})`;
                     modeIndicator.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800';
                 } else {
                     modeIndicator.textContent = `📅 Daily All Songs (${difficultyText})`;
@@ -943,7 +943,7 @@
                 }
             } else {
                 if (gameState.gameMode === 'oldschool') {
-                    modeIndicator.textContent = `📀 Oldschool (${difficultyText})`;
+                    modeIndicator.textContent = `📀 Classic (${difficultyText})`;
                     modeIndicator.className = 'px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800';
                 } else {
                     modeIndicator.textContent = `🎵 All Songs (${difficultyText})`;
