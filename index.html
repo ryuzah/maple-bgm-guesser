@@ -825,8 +825,12 @@
 
         function loadDailyData() {
             const stored = localStorage.getItem('mapleBgmDailyData');
+            console.log('Loading daily data from localStorage:', stored);
             if (stored) {
                 gameState.dailyData = JSON.parse(stored);
+                console.log('Parsed daily data:', gameState.dailyData);
+            } else {
+                console.log('No daily data found in localStorage');
             }
         }
 
@@ -914,6 +918,13 @@
         
         function hasDailyProgress(dailyKey) {
             const dailyGame = gameState.dailyData[dailyKey];
+            console.log('hasDailyProgress check:', {
+                dailyKey,
+                dailyGameExists: !!dailyGame,
+                hasProgressFlag: dailyGame?.hasProgress,
+                isCompleted: dailyGame?.completed,
+                result: dailyGame && dailyGame.hasProgress && !dailyGame.completed
+            });
             return dailyGame && dailyGame.hasProgress && !dailyGame.completed;
         }
 
@@ -1109,25 +1120,44 @@
         }
 
         function startDailyGame(dailyKey) {
+            console.log('=== START DAILY GAME ===');
+            console.log('Daily key:', dailyKey);
+            console.log('Current gameState.dailyData:', gameState.dailyData);
+            
             const dailyGame = getDailyGame(dailyKey);
+            console.log('Daily game after getDailyGame:', dailyGame);
+            
             gameState.guessedSongs = [dailyGame.song];
             gameState.currentSongIndex = 0;
             gameState.currentRound = 1;
             
             // Check if there's existing progress to resume
+            console.log('Checking hasDailyProgress for key:', dailyKey);
+            console.log('hasDailyProgress result:', hasDailyProgress(dailyKey));
+            
             if (hasDailyProgress(dailyKey)) {
+                console.log('=== RESUMING DAILY GAME ===');
                 // Resume from saved progress
                 gameState.score = dailyGame.currentScore;
                 gameState.guessHistory = [...dailyGame.attempts];
                 gameState.currentRound = dailyGame.currentRound || 1;
                 gameState.currentGuess = dailyGame.currentGuess || 1;
                 
+                console.log('Resumed state:', {
+                    score: gameState.score,
+                    guessHistoryLength: gameState.guessHistory.length,
+                    currentRound: gameState.currentRound,
+                    currentGuess: gameState.currentGuess
+                });
+                
                 // If already guessed correctly, show results
                 if (dailyGame.hasGuessedCorrectly) {
+                    console.log('Daily game already completed, showing results');
                     showDailyResults(dailyKey);
                     return;
                 }
             } else {
+                console.log('=== STARTING FRESH DAILY GAME ===');
                 // Start fresh
                 gameState.score = 0;
                 gameState.guessHistory = [];
