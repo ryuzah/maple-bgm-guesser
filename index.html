@@ -343,8 +343,14 @@
             background: linear-gradient(to right, #9333ea 0%, #db2777 100%) !important;
         }
         
-        /* Hide home screen night mode button during gameplay */
-        #gameScreen #homeNightModeButton {
+        /* Hide home screen night mode button when game screen is active */
+        #gameScreen:not(.hidden) ~ * #homeNightModeButton,
+        #gameScreen:not(.hidden) ~ * #homeNightModeButton {
+            display: none !important;
+        }
+        
+        /* Alternative approach - hide when game screen is visible */
+        body:has(#gameScreen:not(.hidden)) #homeNightModeButton {
             display: none !important;
         }
     </style>
@@ -1009,6 +1015,24 @@
             }
         }
         
+        function updateNightModeButtonVisibility() {
+            const homeNightModeButton = document.getElementById('homeNightModeButton');
+            const gameScreen = document.getElementById('gameScreen');
+            const setupScreen = document.getElementById('setupScreen');
+            
+            // Hide home night mode button when game screen is active
+            if (gameScreen && !gameScreen.classList.contains('hidden')) {
+                if (homeNightModeButton) {
+                    homeNightModeButton.style.display = 'none';
+                }
+            } else {
+                // Show home night mode button when on setup screen
+                if (homeNightModeButton && setupScreen && !setupScreen.classList.contains('hidden')) {
+                    homeNightModeButton.style.display = 'block';
+                }
+            }
+        }
+        
         function initNightMode() {
             // Load saved night mode preference
             const savedNightMode = localStorage.getItem('nightMode');
@@ -1023,6 +1047,9 @@
                 if (nightModeIcon) nightModeIcon.textContent = '🌙';
                 if (homeNightModeIcon) homeNightModeIcon.textContent = '🌙';
             }
+            
+            // Initialize button visibility
+            updateNightModeButtonVisibility();
         }
 
                 
@@ -1203,6 +1230,10 @@
             // Update UI
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
+            
+            // Update night mode button visibility
+            updateNightModeButtonVisibility();
+            
             document.getElementById('currentScore').textContent = '0';
             document.getElementById('highScore').textContent = getCurrentHighScore();
             
