@@ -6,6 +6,7 @@
     <title>Maple BGM Guessing Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap');
         
@@ -860,6 +861,15 @@
             playYouTubeAudio(song.url, duration);
         }
 
+        let youtubePlayer = null;
+        let playerReady = false;
+
+        // YouTube API callback
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube API Ready');
+            playerReady = true;
+        }
+
         function playYouTubeAudio(youtubeUrl, duration) {
             // Extract video ID from YouTube URL
             const videoId = extractYouTubeVideoId(youtubeUrl);
@@ -870,39 +880,74 @@
                 return;
             }
             
-            // Create hidden iframe for YouTube audio
-            let iframe = document.getElementById('youtubeAudio');
-            if (!iframe) {
-                iframe = document.createElement('div');
-                iframe.id = 'youtubeAudio';
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
+            // Destroy existing player if any
+            if (youtubePlayer) {
+                youtubePlayer.destroy();
+                youtubePlayer = null;
             }
             
-            // Start from beginning for consistent gameplay
-            iframe.innerHTML = `
-                <iframe id="youtube-player-${Date.now()}" 
-                        width="0" height="0" 
-                        src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" 
-                        frameborder="0" 
-                        allow="autoplay">
-                </iframe>
-            `;
+            // Create YouTube player
+            const playerDiv = document.createElement('div');
+            playerDiv.id = 'youtube-player';
+            playerDiv.style.display = 'none';
+            document.body.appendChild(playerDiv);
             
-            // Show playback feedback
+            youtubePlayer = new YT.Player('youtube-player', {
+                videoId: videoId,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    disablekb: 1,
+                    enablejsapi: 1,
+                    fs: 0,
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                    start: 0
+                },
+                events: {
+                    onReady: (event) => {
+                        event.target.playVideo();
+                        showFeedback(`Playing ${duration} seconds of audio...`, 'info');
+                        
+                        // Set timer to stop playback after duration
+                        if (gameState.playbackTimer) {
+                            clearTimeout(gameState.playbackTimer);
+                        }
+                        
+                        gameState.playbackTimer = setTimeout(() => {
+                            stopYouTubeAudio();
+                            showFeedback('Audio playback ended', 'info');
+                        }, duration * 1000);
+                        
+                        gameState.currentAudio = { pause: () => stopYouTubeAudio() };
+                    },
+                    onError: (event) => {
+                        console.error('YouTube player error:', event.data);
+                        showFeedback('YouTube playback failed. Trying alternative...', 'error');
+                        // Fallback to direct iframe method
+                        fallbackYouTubePlay(videoId, duration);
+                    }
+                }
+            });
+        }
+        
+        function fallbackYouTubePlay(videoId, duration) {
+            // Fallback method using direct iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&start=0`;
+            iframe.allow = 'autoplay';
+            document.body.appendChild(iframe);
+            
             showFeedback(`Playing ${duration} seconds of audio...`, 'info');
             
-            // Set timer to stop playback after duration
-            if (gameState.playbackTimer) {
-                clearTimeout(gameState.playbackTimer);
-            }
-            
             gameState.playbackTimer = setTimeout(() => {
-                stopYouTubeAudio();
+                iframe.remove();
                 showFeedback('Audio playback ended', 'info');
             }, duration * 1000);
             
-            gameState.currentAudio = { pause: () => stopYouTubeAudio() };
+            gameState.currentAudio = { pause: () => iframe.remove() };
         }
         
         function extractYouTubeVideoId(url) {
@@ -919,10 +964,21 @@
         }
         
         function stopYouTubeAudio() {
-            const iframe = document.getElementById('youtubeAudio');
-            if (iframe) {
-                iframe.innerHTML = '';
+            if (youtubePlayer) {
+                youtubePlayer.destroy();
+                youtubePlayer = null;
             }
+            
+            // Remove any fallback iframes
+            const iframes = document.querySelectorAll('iframe[src*="youtube.com"]');
+            iframes.forEach(iframe => iframe.remove());
+            
+            // Remove player div
+            const playerDiv = document.getElementById('youtube-player');
+            if (playerDiv) {
+                playerDiv.remove();
+            }
+            
             if (gameState.playbackTimer) {
                 clearTimeout(gameState.playbackTimer);
                 gameState.playbackTimer = null;
