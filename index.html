@@ -342,6 +342,11 @@
         body.dark-mode button[onclick*="unlimited"]:hover {
             background: linear-gradient(to right, #9333ea 0%, #db2777 100%) !important;
         }
+        
+        /* Hide home screen night mode button during gameplay */
+        #gameScreen #homeNightModeButton {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
