@@ -1783,6 +1783,12 @@
             // Add 'skipped' to guess history
             updateGuessHistory('Skipped', 'skip');
             
+            // Save progress for daily mode
+            if (gameState.isDaily) {
+                const dailyKey = `${gameState.gameMode}_${gameState.difficulty}`;
+                saveDailyProgress(dailyKey);
+            }
+            
             // Check if this was 5th guess before incrementing
             if (gameState.currentGuess >= 5) {
                 showFeedback(`Incorrect! The answer was: ${gameState.difficulty === 'easy' ? song.regions.town : `${song.name} - ${song.regions.town}`}`, 'error');
