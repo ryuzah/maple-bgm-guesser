@@ -308,7 +308,7 @@
         <!-- Game Screen -->
         <div id="gameScreen" class="hidden">
             <!-- Volume and Theme Controls -->
-            <div class="fixed top-4 right-4 z-50 space-y-2">
+            <div class="fixed top-4 right-4 z-50 flex space-x-2">
                 <!-- Night Mode Button -->
                 <button id="nightModeButton" onclick="toggleNightMode()" 
                         class="bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition">
@@ -316,12 +316,12 @@
                 </button>
                 
                 <!-- Volume Control -->
-                <div>
+                <div class="relative">
                     <button id="volumeIconButton" onclick="toggleVolumeSlider()" 
                             class="bg-white rounded-lg shadow-lg p-3 border border-gray-200 hover:bg-gray-50 transition">
                         <i id="volumeIcon" class="fas fa-volume-up text-gray-600 text-lg"></i>
                     </button>
-                    <div id="volumeSliderContainer" class="hidden bg-white rounded-lg shadow-lg p-3 border border-gray-200 mt-2">
+                    <div id="volumeSliderContainer" class="hidden absolute top-full right-0 bg-white rounded-lg shadow-lg p-3 border border-gray-200 mt-2 z-10">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-volume-down text-gray-500 text-sm"></i>
                             <input type="range" id="volumeSlider" min="0" max="100" value="70" 
