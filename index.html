@@ -333,6 +333,15 @@
         body.dark-mode .text-blue-800 {
             color: #60a5fa !important;
         }
+        
+        /* Keep unlimited button in day mode colors even in dark mode */
+        body.dark-mode button[onclick*="unlimited"] {
+            background: linear-gradient(to right, #a855f7 0%, #ec4899 100%) !important;
+        }
+        
+        body.dark-mode button[onclick*="unlimited"]:hover {
+            background: linear-gradient(to right, #9333ea 0%, #db2777 100%) !important;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
