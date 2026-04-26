@@ -860,8 +860,19 @@
             const today = getUTCToday();
             let data = gameState.dailyData[dailyKey];
             
-            // Only generate new game if no data exists (don't recreate if data exists but date is different)
-            if (!data) {
+            // If no data exists OR data is from yesterday, generate new game but preserve progress if it exists
+            if (!data || data.date !== today) {
+                // Preserve existing progress if it exists
+                const existingProgress = data ? {
+                    hasProgress: data.hasProgress,
+                    currentScore: data.currentScore,
+                    attempts: data.attempts,
+                    currentRound: data.currentRound,
+                    currentGuess: data.currentGuess,
+                    hasGuessedCorrectly: data.hasGuessedCorrectly,
+                    completed: data.completed
+                } : null;
+                
                 const [mode, difficulty] = dailyKey.split('_');
                 const seed = today + '_' + dailyKey;
                 const random = seededRandom(seed);
@@ -881,16 +892,16 @@
                 data = {
                     date: today,
                     song: selectedSong,
-                    completed: false,
-                    score: 0,
-                    attempts: [],
-                    // Save state fields
-                    hasProgress: false,
-                    currentScore: 0,
-                    attempts: [],
-                    currentRound: 1,
-                    currentGuess: 1,
-                    hasGuessedCorrectly: false
+                    completed: existingProgress?.completed || false,
+                    score: existingProgress?.score || 0,
+                    attempts: existingProgress?.attempts || [],
+                    // Save state fields - preserve existing progress
+                    hasProgress: existingProgress?.hasProgress || false,
+                    currentScore: existingProgress?.currentScore || 0,
+                    attempts: existingProgress?.attempts || [],
+                    currentRound: existingProgress?.currentRound || 1,
+                    currentGuess: existingProgress?.currentGuess || 1,
+                    hasGuessedCorrectly: existingProgress?.hasGuessedCorrectly || false
                 };
                 
                 gameState.dailyData[dailyKey] = data;
@@ -901,8 +912,21 @@
         }
         
         function saveDailyProgress(dailyKey) {
+            console.log('=== SAVE DAILY PROGRESS ===');
+            console.log('Daily key:', dailyKey);
+            console.log('Current gameState:', {
+                score: gameState.score,
+                guessHistoryLength: gameState.guessHistory.length,
+                currentRound: gameState.currentRound,
+                currentGuess: gameState.currentGuess,
+                isDaily: gameState.isDaily
+            });
+            
             const dailyGame = gameState.dailyData[dailyKey];
-            if (!dailyGame) return;
+            if (!dailyGame) {
+                console.log('ERROR: No daily game found for key:', dailyKey);
+                return;
+            }
             
             // Save current progress
             dailyGame.hasProgress = true;
@@ -912,6 +936,14 @@
             dailyGame.currentGuess = gameState.currentGuess;
             dailyGame.hasGuessedCorrectly = gameState.guessHistory.length > 0 && 
                                         gameState.guessHistory[gameState.guessHistory.length - 1].correct;
+            
+            console.log('Saved progress to daily game:', {
+                hasProgress: dailyGame.hasProgress,
+                currentScore: dailyGame.currentScore,
+                attemptsLength: dailyGame.attempts.length,
+                currentRound: dailyGame.currentRound,
+                currentGuess: dailyGame.currentGuess
+            });
             
             saveDailyData();
         }
