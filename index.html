@@ -824,32 +824,10 @@
         }
 
         function loadDailyData() {
-            console.log('=== LOAD DAILY DATA ===');
             const stored = localStorage.getItem('mapleBgmDailyData');
-            console.log('Raw localStorage data:', stored);
             if (stored) {
-                try {
-                    gameState.dailyData = JSON.parse(stored);
-                    console.log('Successfully parsed daily data:', gameState.dailyData);
-                } catch (error) {
-                    console.error('Error parsing daily data:', error);
-                    gameState.dailyData = {
-                        classic_easy: null,
-                        classic_hard: null,
-                        all_easy: null,
-                        all_hard: null
-                    };
-                }
-            } else {
-                console.log('No daily data found in localStorage, initializing empty');
-                gameState.dailyData = {
-                    classic_easy: null,
-                    classic_hard: null,
-                    all_easy: null,
-                    all_hard: null
-                };
+                gameState.dailyData = JSON.parse(stored);
             }
-            console.log('Final gameState.dailyData after load:', gameState.dailyData);
         }
 
         function saveDailyData() {
@@ -878,20 +856,12 @@
             const today = getUTCToday();
             let data = gameState.dailyData[dailyKey];
             
-            // If no data exists OR data is from yesterday, generate new game but preserve progress if it exists
+            // If no data for today or data is from yesterday, generate new game
             if (!data || data.date !== today) {
-                // Preserve existing progress if it exists
-                const existingProgress = data ? {
-                    hasProgress: data.hasProgress,
-                    currentScore: data.currentScore,
-                    attempts: data.attempts,
-                    currentRound: data.currentRound,
-                    currentGuess: data.currentGuess,
-                    hasGuessedCorrectly: data.hasGuessedCorrectly,
-                    completed: data.completed
-                } : null;
-                
+                // Parse mode and difficulty from dailyKey (format: "mode_difficulty")
                 const [mode, difficulty] = dailyKey.split('_');
+                
+                // Generate deterministic daily game based on date, mode, and difficulty
                 const seed = today + '_' + dailyKey;
                 const random = seededRandom(seed);
                 
@@ -903,23 +873,18 @@
                     );
                 }
                 
-                // Select random song
+                // Select one song using seeded random
                 const songIndex = Math.floor(random() * availableSongs.length);
                 const selectedSong = availableSongs[songIndex];
                 
                 data = {
                     date: today,
+                    mode: mode,
+                    difficulty: difficulty,
                     song: selectedSong,
-                    completed: existingProgress?.completed || false,
-                    score: existingProgress?.score || 0,
-                    attempts: existingProgress?.attempts || [],
-                    // Save state fields - preserve existing progress
-                    hasProgress: existingProgress?.hasProgress || false,
-                    currentScore: existingProgress?.currentScore || 0,
-                    attempts: existingProgress?.attempts || [],
-                    currentRound: existingProgress?.currentRound || 1,
-                    currentGuess: existingProgress?.currentGuess || 1,
-                    hasGuessedCorrectly: existingProgress?.hasGuessedCorrectly || false
+                    completed: false,
+                    score: 0,
+                    attempts: []
                 };
                 
                 gameState.dailyData[dailyKey] = data;
@@ -927,62 +892,6 @@
             }
             
             return data;
-        }
-        
-        function saveDailyProgress(dailyKey) {
-            // Don't save if we're in the middle of resuming
-            if (gameState.isResuming) {
-                console.log('Skipping save during resume process');
-                return;
-            }
-            
-            console.log('=== SAVE DAILY PROGRESS ===');
-            console.log('Daily key:', dailyKey);
-            console.log('Current gameState:', {
-                score: gameState.score,
-                guessHistoryLength: gameState.guessHistory.length,
-                currentRound: gameState.currentRound,
-                currentGuess: gameState.currentGuess,
-                isDaily: gameState.isDaily,
-                isResuming: gameState.isResuming
-            });
-            
-            const dailyGame = gameState.dailyData[dailyKey];
-            if (!dailyGame) {
-                console.log('ERROR: No daily game found for key:', dailyKey);
-                return;
-            }
-            
-            // Save current progress
-            dailyGame.hasProgress = true;
-            dailyGame.currentScore = gameState.score;
-            dailyGame.attempts = [...gameState.guessHistory];
-            dailyGame.currentRound = gameState.currentRound;
-            dailyGame.currentGuess = gameState.currentGuess;
-            dailyGame.hasGuessedCorrectly = gameState.guessHistory.length > 0 && 
-                                        gameState.guessHistory[gameState.guessHistory.length - 1].correct;
-            
-            console.log('Saved progress to daily game:', {
-                hasProgress: dailyGame.hasProgress,
-                currentScore: dailyGame.currentScore,
-                attemptsLength: dailyGame.attempts.length,
-                currentRound: dailyGame.currentRound,
-                currentGuess: dailyGame.currentGuess
-            });
-            
-            saveDailyData();
-        }
-        
-        function hasDailyProgress(dailyKey) {
-            const dailyGame = gameState.dailyData[dailyKey];
-            console.log('hasDailyProgress check:', {
-                dailyKey,
-                dailyGameExists: !!dailyGame,
-                hasProgressFlag: dailyGame?.hasProgress,
-                isCompleted: dailyGame?.completed,
-                result: dailyGame && dailyGame.hasProgress && !dailyGame.completed
-            });
-            return dailyGame && dailyGame.hasProgress && !dailyGame.completed;
         }
 
         function seededRandom(seed) {
@@ -1140,18 +1049,14 @@
                 
         // Initialize game
         async function init() {
-            console.log('=== INITIALIZING GAME ===');
-            console.log('Initial gameState.dailyData:', gameState.dailyData);
             await loadSongs();
-            console.log('After loadSongs, gameState.dailyData:', gameState.dailyData);
             loadDailyData();
-            console.log('After loadDailyData, gameState.dailyData:', gameState.dailyData);
             document.getElementById('highScore').textContent = getCurrentHighScore();
             initVolumeControl();
             initNightMode();
             
-            // Don't reset daily seed - this was clearing saved progress!
-            // resetDailySeed();
+            // Reset daily seed to force regeneration
+            resetDailySeed();
         }
 
         function selectSongCount(count) {
@@ -1181,58 +1086,16 @@
         }
 
         function startDailyGame(dailyKey) {
-            console.log('=== START DAILY GAME ===');
-            console.log('Daily key:', dailyKey);
-            console.log('Current gameState.dailyData:', gameState.dailyData);
-            
             const dailyGame = getDailyGame(dailyKey);
-            console.log('Daily game after getDailyGame:', dailyGame);
-            
             gameState.guessedSongs = [dailyGame.song];
             gameState.currentSongIndex = 0;
-            
-            // Check if there's existing progress to resume
-            console.log('Checking hasDailyProgress for key:', dailyKey);
-            console.log('hasDailyProgress result:', hasDailyProgress(dailyKey));
-            
-            if (hasDailyProgress(dailyKey)) {
-                console.log('=== RESUMING DAILY GAME ===');
-                // Resume from saved progress
-                gameState.score = dailyGame.currentScore;
-                gameState.guessHistory = [...dailyGame.attempts];
-                gameState.currentRound = dailyGame.currentRound || 1;
-                gameState.currentGuess = dailyGame.currentGuess || 1;
-                
-                console.log('Resumed state:', {
-                    score: gameState.score,
-                    guessHistoryLength: gameState.guessHistory.length,
-                    currentRound: gameState.currentRound,
-                    currentGuess: gameState.currentGuess
-                });
-                
-                // Set flag to prevent saving during resume
-                gameState.isResuming = true;
-                
-                // If already guessed correctly, show results
-                if (dailyGame.hasGuessedCorrectly) {
-                    console.log('Daily game already completed, showing results');
-                    showDailyResults(dailyKey);
-                    return;
-                }
-            } else {
-                console.log('=== STARTING FRESH DAILY GAME ===');
-                // Start fresh
-                gameState.score = 0;
-                gameState.guessHistory = [];
-                gameState.currentRound = 1;
-                gameState.currentGuess = 1;
-                gameState.isResuming = false;
-            }
+            gameState.currentRound = 1;
+            gameState.score = 0;
             
             // Update UI
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('currentScore').textContent = gameState.score;
+            document.getElementById('currentScore').textContent = '0';
             document.getElementById('highScore').textContent = getCurrentHighScore();
             
             // Update game mode indicator
@@ -1249,19 +1112,6 @@
             // Update song counter display
             document.getElementById('totalSongs').textContent = '1';
             document.getElementById('currentSongNumber').textContent = '1';
-            
-            // Restore guess history if resuming
-            if (gameState.guessHistory && gameState.guessHistory.length > 0) {
-                updateGuessHistory();
-                updateRoundIndicators();
-                updateGuessDisplay();
-            }
-            
-            // Clear resume flag after game is fully loaded
-            if (gameState.isResuming) {
-                console.log('Clearing resume flag - game fully loaded');
-                gameState.isResuming = false;
-            }
             
             // Start first song
             loadCurrentSong();
@@ -1811,12 +1661,6 @@
             const historyType = correct ? 'correct' : guessType;
             updateGuessHistory(guess, historyType);
             
-            // Save progress for daily mode
-            if (gameState.isDaily) {
-                const dailyKey = `${gameState.gameMode}_${gameState.difficulty}`;
-                saveDailyProgress(dailyKey);
-            }
-            
             if (correct) {
                 const points = gameState.roundPoints[gameState.currentRound - 1];
                 gameState.score += points;
@@ -1894,12 +1738,6 @@
             
             // Add 'skipped' to guess history
             updateGuessHistory('Skipped', 'skip');
-            
-            // Save progress for daily mode
-            if (gameState.isDaily) {
-                const dailyKey = `${gameState.gameMode}_${gameState.difficulty}`;
-                saveDailyProgress(dailyKey);
-            }
             
             // Check if this was 5th guess before incrementing
             if (gameState.currentGuess >= 5) {
