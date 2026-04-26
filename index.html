@@ -449,20 +449,6 @@
                         </div>
                     </div>
                 
-                <!-- Game Settings -->
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">
-                        <i class="fas fa-gamepad text-gray-600 mr-2"></i>
-                        Game Settings
-                    </h3>
-                    <div class="mb-4">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="autoPlayNext" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-sm text-gray-700">Auto-play next song after guessing</span>
-                        </label>
-                    </div>
-                
                 <!-- Action Buttons -->
                 <div class="mt-6 flex space-x-3">
                     <button onclick="saveSettings()" 
@@ -523,9 +509,7 @@
             guessHistory: [], // Track user's guesses for current song
             songResults: [], // Track results for all songs
             volume: 0.7, // Default volume (70%)
-            settings: {
-                autoPlayNext: false
-            }
+            settings: {}
         };
 
         // Load songs data
@@ -701,9 +685,7 @@
             volumeSlider.value = Math.round(gameState.volume * 100);
             volumeValue.textContent = Math.round(gameState.volume * 100) + '%';
             
-            // Set game settings
-            document.getElementById('autoPlayNext').checked = gameState.settings.autoPlayNext;
-            
+                        
             // Add event listener for volume slider
             volumeSlider.oninput = function() {
                 const volume = this.value / 100;
@@ -729,15 +711,7 @@
             gameState.volume = volume;
             localStorage.setItem('mapleBgmVolume', volumeSlider.value);
             
-            // Save other settings
-            const autoPlayNext = document.getElementById('autoPlayNext').checked;
-            
-            gameState.settings = {
-                autoPlayNext: autoPlayNext
-            };
-            
-            localStorage.setItem('mapleBgmSettings', JSON.stringify(gameState.settings));
-            
+                        
             // Apply settings immediately
             applySettings();
             
