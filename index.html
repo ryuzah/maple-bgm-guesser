@@ -581,6 +581,18 @@
             localStorage.setItem('mapleBgmDailyData', JSON.stringify(gameState.dailyData));
         }
 
+        function resetDailySeed() {
+            // Clear all daily data to force regeneration with new seeds
+            localStorage.removeItem('mapleBgmDailyData');
+            gameState.dailyData = {
+                classic_easy: null,
+                classic_hard: null,
+                all_easy: null,
+                all_hard: null
+            };
+            console.log('Daily seed reset - all daily challenges will regenerate');
+        }
+
         function isDailyCompleted(mode) {
             const today = getUTCToday();
             const data = gameState.dailyData[mode];
@@ -760,6 +772,9 @@
             loadDailyData();
             document.getElementById('highScore').textContent = getCurrentHighScore();
             initSettings();
+            
+            // Reset daily seed to force regeneration
+            resetDailySeed();
         }
 
         function selectSongCount(count) {
