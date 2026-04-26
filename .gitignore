@@ -8,8 +8,9 @@ __pycache__/
 *$py.class
 
 # Exclude backup and data files
-*.json
 songs_metadata_backup*
+# Keep songs_metadata.json - it's needed for the game
+!songs_metadata.json
 
 # Exclude development and test files
 test_*
