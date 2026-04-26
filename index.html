@@ -481,11 +481,7 @@
                 <div class="text-lg font-semibold">
                     Song <span id="currentSongNumber">1</span> of <span id="totalSongs">5</span>
                 </div>
-                <div class="text-lg font-semibold">
-                    <i class="fas fa-trophy text-purple-600 mr-2"></i>
-                    High Score: <span id="highScore">0</span>
-                </div>
-            </div>
+                            </div>
 
             <!-- Round Indicators -->
             <div class="flex justify-center gap-2 mb-6">
@@ -570,14 +566,8 @@
                 <div class="text-2xl font-semibold text-gray-700 mb-2">
                     Final Score: <span id="finalScore" class="text-purple-600">0</span>
                 </div>
-                <div class="text-lg text-gray-600">
-                    High Score: <span id="finalHighScore" class="text-purple-600">0</span>
-                </div>
-            </div>
-            <div id="newHighScore" class="hidden mb-6 p-4 bg-green-100 rounded-lg">
-                <div class="text-green-800 font-semibold"> New High Score! </div>
-            </div>
-            
+                            </div>
+                        
             <!-- Song Results Display -->
             <div class="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Song Results</h3>
@@ -740,11 +730,7 @@
                 classic_easy: parseInt(localStorage.getItem('mapleBgmHighScore_classic_easy') || '0'),
                 classic_hard: parseInt(localStorage.getItem('mapleBgmHighScore_classic_hard') || '0'),
                 classic_easy_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_classic_easy_unlimited') || '0'),
-                classic_hard_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_classic_hard_unlimited') || '0'),
-                daily_classic_easy: parseInt(localStorage.getItem('mapleBgmHighScore_daily_classic_easy') || '0'),
-                daily_classic_hard: parseInt(localStorage.getItem('mapleBgmHighScore_daily_classic_hard') || '0'),
-                daily_all_easy: parseInt(localStorage.getItem('mapleBgmHighScore_daily_all_easy') || '0'),
-                daily_all_hard: parseInt(localStorage.getItem('mapleBgmHighScore_daily_all_hard') || '0')
+                classic_hard_unlimited: parseInt(localStorage.getItem('mapleBgmHighScore_classic_hard_unlimited') || '0')
             },
             songCount: 5,
             difficulty: 'easy',
@@ -791,10 +777,10 @@
             }
         }
 
-        // Helper function to get current high score based on mode
+        // Helper function to get current high score based on mode (excluding daily modes)
         function getCurrentHighScore() {
             if (gameState.isDaily) {
-                return gameState.highScores[`daily_${gameState.gameMode}_${gameState.difficulty}`];
+                return 0; // Daily modes don't track high scores
             }
             const gameModePrefix = gameState.gameMode === 'oldschool' ? 'oldschool_' : '';
             const modeKey = gameState.isUnlimited ? 
@@ -803,11 +789,10 @@
             return gameState.highScores[modeKey];
         }
 
-        // Helper function to save high score for current mode
+        // Helper function to save high score for current mode (excluding daily modes)
         function saveHighScore() {
             if (gameState.isDaily) {
-                localStorage.setItem(`mapleBgmHighScore_daily_${gameState.gameMode}_${gameState.difficulty}`, gameState.highScores[`daily_${gameState.gameMode}_${gameState.difficulty}`].toString());
-                return;
+                return; // Daily modes don't save high scores
             }
             const gameModePrefix = gameState.gameMode === 'oldschool' ? 'oldschool_' : '';
             const modeKey = gameState.isUnlimited ? 
@@ -1051,8 +1036,7 @@
         async function init() {
             await loadSongs();
             loadDailyData();
-            document.getElementById('highScore').textContent = getCurrentHighScore();
-            initVolumeControl();
+                        initVolumeControl();
             initNightMode();
             
             // Reset daily seed to force regeneration
@@ -1096,8 +1080,7 @@
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('currentScore').textContent = '0';
-            document.getElementById('highScore').textContent = getCurrentHighScore();
-            
+                        
             // Update game mode indicator
             const modeIndicator = document.getElementById('gameModeIndicator');
             const difficultyText = gameState.difficulty === 'easy' ? 'Easy' : 'Hard';
@@ -1229,8 +1212,7 @@
             updateNightModeButtonVisibility();
             
             document.getElementById('currentScore').textContent = '0';
-            document.getElementById('highScore').textContent = getCurrentHighScore();
-            
+                        
             // Update game mode indicator
             const modeIndicator = document.getElementById('gameModeIndicator');
             const difficultyText = gameState.difficulty === 'easy' ? 'Easy' : 'Hard';
@@ -1833,13 +1815,7 @@
                 dailyGame.attempts = gameState.guessHistory;
                 saveDailyData();
                 
-                // Update daily high score
-                const dailyHighScoreKey = `daily_${gameState.gameMode}_${gameState.difficulty}`;
-                if (gameState.score > gameState.highScores[dailyHighScoreKey]) {
-                    gameState.highScores[dailyHighScoreKey] = gameState.score;
-                    saveHighScore();
-                }
-                
+                                
                 // Show daily results
                 showDailyResults(dailyKey);
             } else {
@@ -1848,20 +1824,7 @@
                 document.getElementById('gameOverScreen').classList.remove('hidden');
                 document.getElementById('finalScore').textContent = gameState.score;
                 
-                const currentHighScore = getCurrentHighScore();
-                document.getElementById('finalHighScore').textContent = currentHighScore;
-                
-                if (gameState.score > currentHighScore) {
-                    // Update high score for current mode
-                    const gameModePrefix = gameState.gameMode === 'oldschool' ? 'oldschool_' : '';
-                    const modeKey = gameState.isUnlimited ? 
-                        `${gameModePrefix}${gameState.difficulty}_unlimited` : 
-                        `${gameModePrefix}${gameState.difficulty}`;
-                    gameState.highScores[modeKey] = gameState.score;
-                    saveHighScore();
-                    document.getElementById('newHighScore').classList.remove('hidden');
-                }
-                
+                                
                 // Populate song results display
                 populateSongResults();
             }
