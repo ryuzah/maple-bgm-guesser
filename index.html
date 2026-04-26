@@ -900,7 +900,9 @@
             // Save current progress
             dailyGame.hasProgress = true;
             dailyGame.currentScore = gameState.score;
-            dailyGame.attempts = gameState.guessHistory;
+            dailyGame.attempts = [...gameState.guessHistory];
+            dailyGame.currentRound = gameState.currentRound;
+            dailyGame.currentGuess = gameState.currentGuess;
             dailyGame.hasGuessedCorrectly = gameState.guessHistory.length > 0 && 
                                         gameState.guessHistory[gameState.guessHistory.length - 1].correct;
             
@@ -1113,7 +1115,9 @@
             if (hasDailyProgress(dailyKey)) {
                 // Resume from saved progress
                 gameState.score = dailyGame.currentScore;
-                gameState.guessHistory = dailyGame.attempts;
+                gameState.guessHistory = [...dailyGame.attempts];
+                gameState.currentRound = dailyGame.currentRound || 1;
+                gameState.currentGuess = dailyGame.currentGuess || 1;
                 
                 // If already guessed correctly, show results
                 if (dailyGame.hasGuessedCorrectly) {
@@ -1124,6 +1128,8 @@
                 // Start fresh
                 gameState.score = 0;
                 gameState.guessHistory = [];
+                gameState.currentRound = 1;
+                gameState.currentGuess = 1;
             }
             
             // Update UI
@@ -1150,6 +1156,8 @@
             // Restore guess history if resuming
             if (gameState.guessHistory && gameState.guessHistory.length > 0) {
                 updateGuessHistory();
+                updateRoundIndicators();
+                updateGuessDisplay();
             }
             
             // Start first song
