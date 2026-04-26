@@ -357,142 +357,6 @@
         body:has(#gameScreen:not(.hidden)) #homeNightModeButton {
             display: none !important;
         }
-        
-        /* Mobile responsive styles */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 1rem;
-                margin: 0.5rem;
-                border-radius: 1rem;
-            }
-            
-            .grid-cols-2 {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-            
-            .text-4xl {
-                font-size: 2rem;
-            }
-            
-            .text-2xl {
-                font-size: 1.5rem;
-            }
-            
-            .text-xl {
-                font-size: 1.25rem;
-            }
-            
-            .py-3 {
-                padding-top: 0.75rem;
-                padding-bottom: 0.75rem;
-            }
-            
-            .px-4 {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .px-6 {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
-            }
-            
-            .px-8 {
-                padding-left: 2rem;
-                padding-right: 2rem;
-            }
-            
-            .mb-8 {
-                margin-bottom: 1.5rem;
-            }
-            
-            .mb-6 {
-                margin-bottom: 1rem;
-            }
-            
-            .p-6 {
-                padding: 1rem;
-            }
-            
-            .p-8 {
-                padding: 1.5rem;
-            }
-            
-            .gap-4 {
-                gap: 0.75rem;
-            }
-            
-            .space-y-2 > * + * {
-                margin-top: 0.5rem;
-            }
-            
-            /* Mobile button improvements */
-            button {
-                min-height: 44px;
-                touch-action: manipulation;
-            }
-            
-            /* Mobile input improvements */
-            input[type="text"] {
-                min-height: 44px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-            
-            /* Mobile header adjustments */
-            header {
-                padding-bottom: 1rem;
-            }
-            
-            header button {
-                position: relative;
-                margin: 0.25rem;
-            }
-            
-            /* Mobile volume controls */
-            .fixed.top-4.right-4 {
-                top: 1rem;
-                right: 1rem;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            /* Mobile game screen adjustments */
-            .game-screen-content {
-                padding: 1rem;
-            }
-            
-            /* Mobile autocomplete */
-            .autocomplete-dropdown {
-                max-height: 200px;
-                overflow-y: auto;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .game-container {
-                padding: 0.75rem;
-                margin: 0.25rem;
-            }
-            
-            .text-4xl {
-                font-size: 1.75rem;
-            }
-            
-            .text-2xl {
-                font-size: 1.25rem;
-            }
-            
-            button {
-                min-height: 48px;
-                font-size: 14px;
-            }
-            
-            input[type="text"] {
-                min-height: 48px;
-                font-size: 16px;
-            }
-        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -1489,77 +1353,52 @@
                 youtubePlayer = null;
             }
             
-            // Check if mobile device
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            // Create YouTube player
+            const playerDiv = document.createElement('div');
+            playerDiv.id = 'youtube-player';
+            playerDiv.style.display = 'none';
+            document.body.appendChild(playerDiv);
             
-            if (isMobile) {
-                // Mobile fallback - open YouTube in new tab with timestamp
-                showFeedback('Opening YouTube in new tab (mobile compatibility)...', 'info');
-                const newWindow = window.open(`https://www.youtube.com/watch?v=${videoId}&t=0`, '_blank');
-                
-                // Set timer to show feedback after duration
-                if (gameState.playbackTimer) {
-                    clearTimeout(gameState.playbackTimer);
-                }
-                
-                gameState.playbackTimer = setTimeout(() => {
-                    showFeedback('Audio playback time ended', 'info');
-                }, duration * 1000);
-                
-                gameState.currentAudio = { pause: () => {
-                    if (newWindow && !newWindow.closed) {
-                        showFeedback('Please close the YouTube tab to stop playback', 'info');
-                    }
-                }};
-            } else {
-                // Desktop - use YouTube iframe player
-                // Create YouTube player
-                const playerDiv = document.createElement('div');
-                playerDiv.id = 'youtube-player';
-                playerDiv.style.display = 'none';
-                document.body.appendChild(playerDiv);
-                
-                youtubePlayer = new YT.Player('youtube-player', {
-                    videoId: videoId,
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 0,
-                        disablekb: 1,
-                        fs: 0,
-                        modestbranding: 1,
-                        rel: 0,
-                        showinfo: 0,
-                        start: 0,
-                        iv_load_policy: 3
-                    },
-                    events: {
-                        onReady: (event) => {
-                            // Set volume based on game state
-                            event.target.setVolume(Math.round(gameState.volume * 100));
-                            event.target.playVideo();
-                            showFeedback(`Playing ${duration} seconds of audio...`, 'info');
-                            
-                            // Set timer to stop playback after duration
-                            if (gameState.playbackTimer) {
-                                clearTimeout(gameState.playbackTimer);
-                            }
-                            
-                            gameState.playbackTimer = setTimeout(() => {
-                                stopYouTubeAudio();
-                                showFeedback('Audio playback ended', 'info');
-                            }, duration * 1000);
-                            
-                            gameState.currentAudio = { pause: () => stopYouTubeAudio() };
-                        },
-                        onError: (event) => {
-                            // YouTube player error occurred
-                            showFeedback('YouTube playback failed. Trying alternative...', 'error');
-                            // Fallback to direct iframe method
-                            fallbackYouTubePlay(videoId, duration);
+            youtubePlayer = new YT.Player('youtube-player', {
+                videoId: videoId,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    disablekb: 1,
+                    enablejsapi: 1,
+                    fs: 0,
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                    start: 0
+                },
+                events: {
+                    onReady: (event) => {
+                        // Set volume based on game state
+                        event.target.setVolume(Math.round(gameState.volume * 100));
+                        event.target.playVideo();
+                        showFeedback(`Playing ${duration} seconds of audio...`, 'info');
+                        
+                        // Set timer to stop playback after duration
+                        if (gameState.playbackTimer) {
+                            clearTimeout(gameState.playbackTimer);
                         }
+                        
+                        gameState.playbackTimer = setTimeout(() => {
+                            stopYouTubeAudio();
+                            showFeedback('Audio playback ended', 'info');
+                        }, duration * 1000);
+                        
+                        gameState.currentAudio = { pause: () => stopYouTubeAudio() };
+                    },
+                    onError: (event) => {
+                        // YouTube player error occurred
+                        showFeedback('YouTube playback failed. Trying alternative...', 'error');
+                        // Fallback to direct iframe method
+                        fallbackYouTubePlay(videoId, duration);
                     }
-                });
-            }
+                }
+            });
         }
         
         function fallbackYouTubePlay(videoId, duration) {
