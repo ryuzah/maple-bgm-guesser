@@ -115,8 +115,6 @@ The game is designed to work with local MP3 files. When you run the download scr
 ## Troubleshooting
 
 ### Audio Not Playing
-- Ensure you've run the download script to get actual MP3 files
-- Check that `bgm_files/` directory contains the MP3 files
 - Verify browser allows audio playback
 
 ### Songs Not Loading
