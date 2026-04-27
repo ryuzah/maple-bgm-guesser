@@ -507,33 +507,61 @@
                 border-radius: 0 !important;
                 overflow-y: auto !important;
                 -webkit-overflow-scrolling: touch !important;
-                padding: 16px !important;
+                padding: 0 !important;
                 box-sizing: border-box !important;
+                z-index: 9999 !important;
             }
             
             .modal-content {
                 padding: 16px !important;
-                max-height: calc(100vh - 80px) !important;
-                overflow-y: auto !important;
+                max-height: none !important;
+                overflow-y: visible !important;
                 -webkit-overflow-scrolling: touch !important;
                 position: relative !important;
+                min-height: 100vh !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
             
-            /* Ensure close button is always visible */
+            /* Modal inner container for scrolling */
+            .modal-content > div {
+                flex: 1 !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding-bottom: 80px !important; /* Space for close button */
+            }
+            
+            /* Ensure close button is always visible at bottom */
             .modal button {
-                position: sticky !important;
-                top: 0 !important;
-                z-index: 20 !important;
+                position: fixed !important;
+                bottom: 16px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                z-index: 10000 !important;
                 background: white !important;
                 border: 2px solid #e5e7eb !important;
                 min-height: 44px !important;
-                margin-bottom: 16px !important;
+                padding: 12px 24px !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             }
             
             body.dark-mode .modal button {
                 background: #374151 !important;
                 border-color: #4b5563 !important;
                 color: white !important;
+            }
+            
+            /* About modal specific fixes */
+            #aboutModal .modal-content {
+                justify-content: flex-start !important;
+                padding-top: 32px !important;
+            }
+            
+            #aboutModal .modal-content > div {
+                max-width: 400px !important;
+                margin: 0 auto !important;
+                width: 100% !important;
             }
             
             /* Game over screen */
