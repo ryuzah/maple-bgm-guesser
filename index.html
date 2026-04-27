@@ -764,7 +764,6 @@
             audioElement: null,
             currentAudioUrl: '',
             currentAudio: null, // Track current playing audio
-            mobileAudio: null, // Track mobile HTML5 audio
             playbackTimer: null, // Track YouTube playback timer
             selectedAutocompleteIndex: -1,
             roundDurations: [3, 5, 7, 9, 11],
@@ -1342,30 +1341,7 @@
             playerReady = true;
         }
 
-        // Mobile detection
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // Google Drive URL converter
-        function convertGoogleDriveUrl(url) {
-            // Convert Google Drive share URL to direct download URL
-            const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (match) {
-                const fileId = match[1];
-                return `https://drive.google.com/uc?export=download&id=${fileId}`;
-            }
-            return url; // Return original if not Google Drive
-        }
-
         function playYouTubeAudio(youtubeUrl, duration) {
-            // Check if mobile and try Google Drive fallback first
-            if (isMobileDevice()) {
-                playMobileAudioFallback(youtubeUrl, duration);
-                return;
-            }
-
-            // Desktop: Use YouTube as before
             // Extract video ID from YouTube URL
             const videoId = extractYouTubeVideoId(youtubeUrl);
             if (!videoId) {
@@ -1476,104 +1452,10 @@
                 playerDiv.remove();
             }
             
-            // Stop mobile audio if playing
-            if (gameState.mobileAudio) {
-                gameState.mobileAudio.pause();
-                gameState.mobileAudio = null;
-            }
-            
             if (gameState.playbackTimer) {
                 clearTimeout(gameState.playbackTimer);
                 gameState.playbackTimer = null;
             }
-        }
-
-        // Mobile audio fallback system
-        function playMobileAudioFallback(youtubeUrl, duration) {
-            // Find the current song
-            const currentSong = gameState.guessedSongs[gameState.currentSongIndex];
-            if (!currentSong) return;
-
-            // Try Google Drive URL first, then YouTube
-            let audioUrl = currentSong.url;
-            
-            // Convert to Google Drive direct URL if needed
-            if (audioUrl.includes('drive.google.com')) {
-                audioUrl = convertGoogleDriveUrl(audioUrl);
-            }
-
-            // Create HTML5 audio element
-            const audio = new Audio(audioUrl);
-            
-            audio.addEventListener('canplay', () => {
-                audio.play().catch(e => {
-                    console.log('Mobile audio play failed:', e);
-                    // Fallback to YouTube if mobile audio fails
-                    playYouTubeDesktop(youtubeUrl, duration);
-                });
-            });
-
-            audio.addEventListener('error', (e) => {
-                console.log('Mobile audio error:', e);
-                // Fallback to YouTube
-                playYouTubeDesktop(youtubeUrl, duration);
-            });
-
-            // Set up playback timer
-            gameState.playbackTimer = setTimeout(() => {
-                stopYouTubeAudio();
-                showFeedback('Audio playback ended', 'info');
-            }, duration * 1000);
-
-            // Store reference for stopping
-            gameState.mobileAudio = audio;
-            gameState.currentAudio = audio;
-        }
-
-        // Desktop YouTube fallback (renamed from original playYouTubeAudio logic)
-        function playYouTubeDesktop(youtubeUrl, duration) {
-            // Extract video ID from YouTube URL
-            const videoId = extractYouTubeVideoId(youtubeUrl);
-            if (!videoId) {
-                showFeedback('Invalid YouTube URL', 'error');
-                document.getElementById('playButton').classList.remove('hidden');
-                document.getElementById('replayButton').classList.add('hidden');
-                return;
-            }
-            
-            // Destroy existing player if any
-            if (youtubePlayer) {
-                youtubePlayer.destroy();
-                youtubePlayer = null;
-            }
-            
-            // Create YouTube player (rest of original logic)
-            const playerDiv = document.createElement('div');
-            playerDiv.id = 'youtube-player';
-            playerDiv.style.display = 'none';
-            document.body.appendChild(playerDiv);
-
-            youtubePlayer = new YT.Player('youtube-player', {
-                videoId: videoId,
-                start: 0,
-                events: {
-                    onReady: (event) => {
-                        event.target.playVideo();
-                        
-                        gameState.playbackTimer = setTimeout(() => {
-                            stopYouTubeAudio();
-                            showFeedback('Audio playback ended', 'info');
-                        }, duration * 1000);
-                        
-                        gameState.currentAudio = { pause: () => stopYouTubeAudio() };
-                    },
-                    onError: (event) => {
-                        showFeedback('Failed to load audio', 'error');
-                        document.getElementById('playButton').classList.remove('hidden');
-                        document.getElementById('replayButton').classList.add('hidden');
-                    }
-                }
-            });
         }
 
         function replayAudio() {

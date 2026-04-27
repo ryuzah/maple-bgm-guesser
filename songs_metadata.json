@@ -558,7 +558,7 @@
     "name": "Dark Shadow",
     "regions": {
       "id": 49,
-      "town": "Orbis"
+      "town": "Ludibrium"
     },
     "url": "https://www.youtube.com/watch?v=wWB1hTbtoNQ",
     "tags": [
@@ -1931,46 +1931,6 @@
       "town": "Heliseum"
     },
     "url": "https://www.youtube.com/watch?v=cOxp5RHqmjk",
-    "tags": []
-  },
-  {
-    "id": 189,
-    "name": "5th Spotlight Fly Away",
-    "regions": {
-      "id": 189,
-      "town": "Pantheon"
-    },
-    "url": "https://www.youtube.com/watch?v=njzZP2857Yc",
-    "tags": []
-  },
-  {
-    "id": 190,
-    "name": "5th Spotlight Fly Away (English)",
-    "regions": {
-      "id": 190,
-      "town": "Pantheon"
-    },
-    "url": "https://www.youtube.com/watch?v=hkOtLzywHjY",
-    "tags": []
-  },
-  {
-    "id": 191,
-    "name": "6th Grand Finale Star Bubble",
-    "regions": {
-      "id": 191,
-      "town": "Pantheon"
-    },
-    "url": "https://www.youtube.com/watch?v=qMKlpiiwVEc",
-    "tags": []
-  },
-  {
-    "id": 192,
-    "name": "6th Grand Finale Star Bubble (English)",
-    "regions": {
-      "id": 192,
-      "town": "Pantheon"
-    },
-    "url": "https://www.youtube.com/watch?v=8ptGYzhGkz4",
     "tags": []
   },
   {
