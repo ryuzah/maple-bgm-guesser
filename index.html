@@ -1331,6 +1331,108 @@
         let youtubePlayer = null;
         let playerReady = false;
 
+        // Mobile device detection
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (typeof window.orientation !== "undefined") || 
+                   (navigator.userAgent.includes('Mobile'));
+        }
+
+        // Mobile audio fallback using Netlify CDN
+        function playMobileAudioFallback(youtubeUrl, duration) {
+            try {
+                // Extract song name from current song to construct Netlify CDN URL
+                const song = gameState.guessedSongs[gameState.currentSongIndex];
+                const songName = song.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_');
+                
+                // Construct Netlify CDN URL
+                const netlifyAudioUrl = `https://agent-69eebf3e2150e81300824122--maple-bgm.netlify.app/${songName}.mp3`;
+                
+                showFeedback('Loading audio from CDN...', 'info');
+                
+                // Use the existing checkAndPlayAudio function
+                checkAndPlayAudio(netlifyAudioUrl, duration)
+                    .then(() => {
+                        showFeedback('Playing audio from CDN...', 'success');
+                    })
+                    .catch((error) => {
+                        console.error('Netlify CDN audio failed:', error);
+                        showFeedback('CDN audio failed, trying YouTube...', 'warning');
+                        // Fallback to YouTube if CDN fails
+                        playYouTubeAudioDesktop(youtubeUrl, duration);
+                    });
+                    
+            } catch (error) {
+                console.error('Mobile audio fallback error:', error);
+                showFeedback('Mobile audio failed, trying YouTube...', 'warning');
+                playYouTubeAudioDesktop(youtubeUrl, duration);
+            }
+        }
+
+        // Desktop YouTube audio function (renamed from original)
+        function playYouTubeAudioDesktop(youtubeUrl, duration) {
+            // Extract video ID from YouTube URL
+            const videoId = extractYouTubeVideoId(youtubeUrl);
+            if (!videoId) {
+                showFeedback('Invalid YouTube URL', 'error');
+                document.getElementById('playButton').classList.remove('hidden');
+                document.getElementById('replayButton').classList.add('hidden');
+                return;
+            }
+            
+            // Destroy existing player if any
+            if (youtubePlayer) {
+                youtubePlayer.destroy();
+                youtubePlayer = null;
+            }
+            
+            // Create YouTube player
+            const playerDiv = document.createElement('div');
+            playerDiv.id = 'youtube-player';
+            playerDiv.style.display = 'none';
+            document.body.appendChild(playerDiv);
+            
+            youtubePlayer = new YT.Player('youtube-player', {
+                height: '0',
+                width: '0',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'iv_load_policy': 3,
+                    'modestbranding': 1
+                },
+                events: {
+                    'onReady': (event) => {
+                        event.target.setVolume(Math.round(gameState.volume * 100));
+                        event.target.playVideo();
+                        
+                        // Start timer for duration
+                        const timer = setTimeout(() => {
+                            if (youtubePlayer) {
+                                youtubePlayer.stopVideo();
+                                youtubePlayer.destroy();
+                                youtubePlayer = null;
+                            }
+                        }, duration * 1000);
+                        
+                        // Store timer reference
+                        gameState.currentTimer = timer;
+                    },
+                    'onError': (event) => {
+                        // YouTube player error occurred
+                        showFeedback('YouTube playback failed. Trying alternative...', 'error');
+                        // Fallback to direct iframe method
+                        fallbackYouTubePlay(videoId, duration);
+                    }
+                }
+            });
+        }
+
         // YouTube API callback
         function onYouTubeIframeAPIReady() {
                 // YouTube API ready
@@ -1338,6 +1440,12 @@
         }
 
         function playYouTubeAudio(youtubeUrl, duration) {
+            // Check if mobile device and use Netlify CDN fallback
+            if (isMobileDevice()) {
+                playMobileAudioFallback(youtubeUrl, duration);
+                return;
+            }
+            
             // Extract video ID from YouTube URL
             const videoId = extractYouTubeVideoId(youtubeUrl);
             if (!videoId) {
