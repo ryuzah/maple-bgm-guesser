@@ -1315,6 +1315,7 @@
             gameState.gameMode = mode;
             document.getElementById('gameModeModal').classList.add('hidden');
             document.getElementById('difficultyModal').classList.remove('hidden');
+            lockScroll();
         }
 
         function startDailyGame(dailyKey) {
@@ -2277,21 +2278,49 @@
             }
         });
 
+        // Scroll lock functionality for modals
+        let scrollPosition = 0;
+        
+        function lockScroll() {
+            scrollPosition = window.pageYOffset;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollPosition}px`;
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function unlockScroll() {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+            window.scrollTo(0, scrollPosition);
+        }
+
         // About modal functions
         function showAbout() {
             document.getElementById('aboutModal').classList.remove('hidden');
+            lockScroll();
         }
 
         function closeAbout() {
             document.getElementById('aboutModal').classList.add('hidden');
+            unlockScroll();
+        }
+
+        function showGameModeModal() {
+            document.getElementById('gameModeModal').classList.remove('hidden');
+            lockScroll();
         }
 
         function closeGameModeModal() {
             document.getElementById('gameModeModal').classList.add('hidden');
+            unlockScroll();
         }
 
         function closeDifficultyModal() {
             document.getElementById('difficultyModal').classList.add('hidden');
+            unlockScroll();
         }
 
         // Close modal when clicking outside
