@@ -374,25 +374,32 @@
             /* Header adjustments */
             header {
                 margin-bottom: 16px !important;
+                padding-top: 60px !important; /* Add space for absolute positioned buttons */
             }
             
             header h1 {
-                font-size: 1.75rem !important;
+                font-size: 1.5rem !important;
                 margin-bottom: 8px !important;
+                padding: 0 60px !important; /* Add padding to avoid button overlap */
             }
             
             header p {
                 font-size: 0.875rem !important;
+                padding: 0 60px !important; /* Add padding to avoid button overlap */
             }
             
             /* Home button and night mode button */
             header button {
-                padding: 8px 12px !important;
-                font-size: 0.875rem !important;
+                padding: 6px 10px !important;
+                font-size: 0.75rem !important;
+                top: 8px !important; /* Position at top */
+                z-index: 10 !important;
             }
             
             #homeNightModeButton {
-                padding: 8px !important;
+                padding: 6px !important;
+                top: 8px !important; /* Position at top */
+                z-index: 10 !important;
             }
             
             /* Button grid adjustments */
@@ -500,11 +507,33 @@
                 border-radius: 0 !important;
                 overflow-y: auto !important;
                 -webkit-overflow-scrolling: touch !important;
+                padding: 16px !important;
+                box-sizing: border-box !important;
             }
             
             .modal-content {
                 padding: 16px !important;
-                max-height: none !important;
+                max-height: calc(100vh - 80px) !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                position: relative !important;
+            }
+            
+            /* Ensure close button is always visible */
+            .modal button {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 20 !important;
+                background: white !important;
+                border: 2px solid #e5e7eb !important;
+                min-height: 44px !important;
+                margin-bottom: 16px !important;
+            }
+            
+            body.dark-mode .modal button {
+                background: #374151 !important;
+                border-color: #4b5563 !important;
+                color: white !important;
             }
             
             /* Game over screen */
