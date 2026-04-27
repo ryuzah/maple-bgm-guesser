@@ -357,6 +357,205 @@
         body:has(#gameScreen:not(.hidden)) #homeNightModeButton {
             display: none !important;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px !important;
+            }
+            
+            .game-container {
+                padding: 16px !important;
+                border-radius: 12px !important;
+                max-width: 100% !important;
+                margin: 8px !important;
+            }
+            
+            /* Header adjustments */
+            header {
+                margin-bottom: 16px !important;
+            }
+            
+            header h1 {
+                font-size: 1.75rem !important;
+                margin-bottom: 8px !important;
+            }
+            
+            header p {
+                font-size: 0.875rem !important;
+            }
+            
+            /* Home button and night mode button */
+            header button {
+                padding: 8px 12px !important;
+                font-size: 0.875rem !important;
+            }
+            
+            #homeNightModeButton {
+                padding: 8px !important;
+            }
+            
+            /* Button grid adjustments */
+            .grid-cols-2 {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            
+            /* Section cards */
+            .p-6 {
+                padding: 16px !important;
+            }
+            
+            /* Buttons */
+            button {
+                padding: 12px 16px !important;
+                font-size: 0.875rem !important;
+                min-height: 44px !important; /* iOS touch target */
+            }
+            
+            .py-3 {
+                padding-top: 12px !important;
+                padding-bottom: 12px !important;
+            }
+            
+            .px-4 {
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+            
+            .py-4 {
+                padding-top: 16px !important;
+                padding-bottom: 16px !important;
+            }
+            
+            .px-6 {
+                padding-left: 24px !important;
+                padding-right: 24px !important;
+            }
+            
+            /* Game screen adjustments */
+            .text-3xl {
+                font-size: 1.5rem !important;
+            }
+            
+            .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .text-xl {
+                font-size: 1.125rem !important;
+            }
+            
+            /* Input field */
+            input[type="text"] {
+                font-size: 16px !important; /* Prevent zoom on iOS */
+                padding: 12px 16px !important;
+                min-height: 44px !important;
+            }
+            
+            /* Autocomplete dropdown */
+            .autocomplete-dropdown {
+                max-height: 150px !important;
+                font-size: 0.875rem !important;
+            }
+            
+            .autocomplete-item {
+                padding: 12px 16px !important;
+                font-size: 0.875rem !important;
+            }
+            
+            /* Round indicators */
+            .round-indicator {
+                font-size: 0.75rem !important;
+                padding: 4px 8px !important;
+            }
+            
+            /* Feedback messages */
+            .feedback-message {
+                font-size: 0.875rem !important;
+                padding: 8px 12px !important;
+            }
+            
+            /* Volume and theme controls */
+            .fixed.top-4.right-4 {
+                top: 8px !important;
+                right: 8px !important;
+            }
+            
+            .space-x-2 > * + * {
+                margin-left: 4px !important;
+            }
+            
+            /* Mobile modal fixes */
+            .modal {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            .modal-content {
+                padding: 16px !important;
+                max-height: none !important;
+            }
+            
+            /* Game over screen */
+            #gameOverScreen {
+                padding: 16px !important;
+            }
+            
+            /* Song results table */
+            table {
+                font-size: 0.75rem !important;
+            }
+            
+            th, td {
+                padding: 8px 4px !important;
+            }
+            
+            /* Daily results screen */
+            #dailyResultsScreen {
+                padding: 16px !important;
+            }
+            
+            /* Hide some decorative elements on mobile */
+            .backdrop-filter {
+                backdrop-filter: none !important;
+            }
+        }
+        
+        /* Small mobile phones */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 12px !important;
+                margin: 4px !important;
+            }
+            
+            header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            button {
+                font-size: 0.8125rem !important;
+                padding: 10px 14px !important;
+            }
+            
+            .text-3xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .text-2xl {
+                font-size: 1.125rem !important;
+            }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
