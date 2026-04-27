@@ -1341,12 +1341,13 @@
         // Mobile audio fallback using Netlify CDN
         function playMobileAudioFallback(youtubeUrl, duration) {
             try {
-                // Extract song name from current song to construct Netlify CDN URL
+                // Extract song name and region from current song to construct Netlify CDN URL
                 const song = gameState.guessedSongs[gameState.currentSongIndex];
-                const songName = song.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_');
+                const songName = song.name.toLowerCase();
+                const regionName = song.regions.town.toLowerCase();
                 
-                // Construct Netlify CDN URL
-                const netlifyAudioUrl = `https://agent-69eebf3e2150e81300824122--maple-bgm.netlify.app/${songName}.mp3`;
+                // Construct Netlify CDN URL using the correct naming pattern: "song name - region.webm"
+                const netlifyAudioUrl = `https://agent-69eebf3e2150e81300824122--maple-bgm.netlify.app/${songName} - ${regionName}.webm`;
                 
                 showFeedback('Loading audio from CDN...', 'info');
                 
