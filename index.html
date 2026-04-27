@@ -1416,7 +1416,6 @@
             gameState.gameMode = mode;
             document.getElementById('gameModeModal').classList.add('hidden');
             document.getElementById('difficultyModal').classList.remove('hidden');
-            lockScroll();
         }
 
         function startDailyGame(dailyKey) {
@@ -2401,27 +2400,22 @@
         // About modal functions
         function showAbout() {
             document.getElementById('aboutModal').classList.remove('hidden');
-            lockScroll();
         }
 
         function closeAbout() {
             document.getElementById('aboutModal').classList.add('hidden');
-            unlockScroll();
         }
 
         function showGameModeModal() {
             document.getElementById('gameModeModal').classList.remove('hidden');
-            lockScroll();
         }
 
         function closeGameModeModal() {
             document.getElementById('gameModeModal').classList.add('hidden');
-            unlockScroll();
         }
 
         function closeDifficultyModal() {
             document.getElementById('difficultyModal').classList.add('hidden');
-            unlockScroll();
         }
 
         // Close modal when clicking outside
