@@ -1392,9 +1392,30 @@
                     );
                 }
                 
-                // Select one song using seeded random
-                const songIndex = Math.floor(random() * availableSongs.length);
-                const selectedSong = availableSongs[songIndex];
+                // Select one song using seeded random with validation
+                let selectedSong = null;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                // Try to find a valid song (in case some songs were removed)
+                while (!selectedSong && attempts < maxAttempts) {
+                    const songIndex = Math.floor(random() * availableSongs.length);
+                    const candidateSong = availableSongs[songIndex];
+                    
+                    // Validate song exists and has required properties
+                    if (candidateSong && candidateSong.url && candidateSong.name) {
+                        selectedSong = candidateSong;
+                    } else {
+                        // Try next random seed
+                        attempts++;
+                        random(); // advance the random generator
+                    }
+                }
+                
+                // Fallback: if no valid song found, pick first available song
+                if (!selectedSong && availableSongs.length > 0) {
+                    selectedSong = availableSongs[0];
+                }
                 
                 // Create new data object for today
                 data = {
@@ -1789,6 +1810,15 @@
 
         function loadCurrentSong() {
             const song = gameState.guessedSongs[gameState.currentSongIndex];
+            
+            // Validate song exists and has required properties
+            if (!song || !song.url) {
+                console.error('Invalid song data:', song);
+                // Handle error gracefully - could show error message or fallback
+                alert('Error: Song data is missing. Please try starting a new game.');
+                return;
+            }
+            
             gameState.currentRound = 1;
             gameState.currentAudioUrl = song.url;
             
