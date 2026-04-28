@@ -1374,14 +1374,23 @@
             const today = getUTCToday();
             let data = gameState.dailyData[dailyKey];
             
+            // Check if we need to clear old daily data due to seed version change
+            // This forces regeneration of daily songs after metadata updates
+            const currentSeedVersion = 'v2';
+            if (data && data.seedVersion !== currentSeedVersion) {
+                console.log('Clearing old daily data due to seed version change');
+                data = null; // Force regeneration with new seed
+            }
+            
             // If no data for today or data is from yesterday, generate new game
             // But only if it's not already completed for today
             if (!data || data.date !== today) {
                 // Parse mode and difficulty from dailyKey (format: "mode_difficulty")
                 const [mode, difficulty] = dailyKey.split('_');
                 
-                // Generate deterministic daily game based on date, mode, and difficulty
-                const seed = today + '_' + dailyKey;
+                // Generate deterministic daily game based on date, mode, difficulty, and version
+                // Version 2 forces regeneration after song metadata updates (April 2026)
+                const seed = today + '_' + dailyKey + '_v2';
                 const random = seededRandom(seed);
                 
                 // Filter songs based on mode
@@ -1425,7 +1434,8 @@
                     song: selectedSong,
                     completed: false,
                     score: 0,
-                    attempts: []
+                    attempts: [],
+                    seedVersion: currentSeedVersion
                 };
                 
                 gameState.dailyData[dailyKey] = data;
