@@ -1371,6 +1371,24 @@
             console.log('Daily seed reset - all daily challenges will regenerate');
         }
 
+        // Function to clear corrupted daily data
+        function clearCorruptedDailyData() {
+            let cleared = false;
+            for (const key in gameState.dailyData) {
+                const data = gameState.dailyData[key];
+                if (data && (!data.song || !data.song.name || !data.song.url)) {
+                    console.log('Clearing corrupted daily data for:', key);
+                    gameState.dailyData[key] = null;
+                    cleared = true;
+                }
+            }
+            if (cleared) {
+                saveDailyData();
+                console.log('Corrupted daily data cleared and saved');
+            }
+            return cleared;
+        }
+
         function isDailyCompleted(mode) {
             const today = getUTCToday();
             const data = gameState.dailyData[mode];
@@ -1400,8 +1418,15 @@
             }
             
             // If no data for today or data is from yesterday, generate new game
+            // Also regenerate if song is null or missing
             // But only if it's not already completed for today
-            if (!data || data.date !== today) {
+            if (!data || data.date !== today || !data.song) {
+                if (data && !data.song) {
+                    console.log('Clearing corrupted daily data with null song');
+                }
+                if (data && data.date !== today) {
+                    console.log('Regenerating daily data for new date');
+                }
                 // Parse mode and difficulty from dailyKey (format: "mode_difficulty")
                 const [mode, difficulty] = dailyKey.split('_');
                 
@@ -1655,6 +1680,7 @@
         async function init() {
             await loadSongs();
             loadDailyData();
+            clearCorruptedDailyData(); // Clear any corrupted daily data on startup
             document.getElementById('highScore').textContent = getCurrentHighScore();
             initVolumeControl();
             initNightMode();
