@@ -1385,6 +1385,12 @@
             console.log('Today:', today);
             console.log('Existing data:', data);
             
+            // Check if songs are loaded
+            if (!gameState.songs || gameState.songs.length === 0) {
+                console.error('Songs not loaded yet! Cannot generate daily game.');
+                return null;
+            }
+            
             // Check if we need to clear old daily data due to seed version change
             // This forces regeneration of daily songs after metadata updates
             const currentSeedVersion = 'v2';
@@ -1652,6 +1658,13 @@
         }
 
         function selectDailyMode(mode, difficulty) {
+            // Check if songs are loaded before proceeding
+            if (!gameState.songs || gameState.songs.length === 0) {
+                console.error('Songs not loaded yet! Please wait for the game to initialize.');
+                alert('Game is still loading. Please wait a moment and try again.');
+                return;
+            }
+            
             gameState.isDaily = true;
             gameState.gameMode = mode;
             gameState.difficulty = difficulty; // Daily mode now supports both difficulties
