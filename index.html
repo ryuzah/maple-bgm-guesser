@@ -1964,8 +1964,8 @@
                 gameState.currentAudio = null;
             }
             
-            // Play YouTube audio
-            playYouTubeAudio(song.url, duration);
+            // Play audio - use currentAudioUrl which should be set correctly for mobile/desktop
+            playYouTubeAudio(gameState.currentAudioUrl, duration);
         }
 
         let youtubePlayer = null;
@@ -1978,28 +1978,28 @@
                    (navigator.userAgent.includes('Mobile'));
         }
 
-        // Mobile audio fallback using Netlify CDN
+        // Mobile audio using blob storage
         function playMobileAudioFallback(youtubeUrl, duration) {
             try {
-                // Extract song name and region from current song to construct Netlify CDN URL
+                // Extract song name and region from current song to construct blob storage URL
                 const song = gameState.guessedSongs[gameState.currentSongIndex];
-                const songName = song.name.toLowerCase();
-                const regionName = song.regions.town.toLowerCase();
                 
-                // Construct Netlify CDN URL using the correct naming pattern: "song name - region.webm"
-                const netlifyAudioUrl = `https://agent-69eebf3e2150e81300824122--maple-bgm.netlify.app/${songName} - ${regionName}.webm`;
+                // Construct blob storage URL using proper URL encoding
+                const blobBaseUrl = 'https://s3ln8cylhjndvwrq.public.blob.vercel-storage.com/';
+                const fileName = `${encodeURIComponent(song.name)} - ${encodeURIComponent(song.regions.town)}.webm`;
+                const blobAudioUrl = blobBaseUrl + fileName;
                 
-                showFeedback('Loading audio from CDN...', 'info');
+                showFeedback('Loading audio...', 'info');
                 
                 // Use the existing checkAndPlayAudio function
-                checkAndPlayAudio(netlifyAudioUrl, duration)
+                checkAndPlayAudio(blobAudioUrl, duration)
                     .then(() => {
-                        showFeedback('Playing audio from CDN...', 'success');
+                        showFeedback('Playing audio...', 'success');
                     })
                     .catch((error) => {
-                        console.error('Netlify CDN audio failed:', error);
-                        showFeedback('CDN audio failed, trying YouTube...', 'warning');
-                        // Fallback to YouTube if CDN fails
+                        console.error('Blob storage audio failed:', error);
+                        showFeedback('Audio failed, trying YouTube...', 'warning');
+                        // Fallback to YouTube if blob storage fails
                         playYouTubeAudioDesktop(youtubeUrl, duration);
                     });
                     
