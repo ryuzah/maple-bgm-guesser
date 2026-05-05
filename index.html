@@ -864,7 +864,7 @@
                 Maple Heardle
             </h1>
             <p class="text-gray-600">Test your knowledge of MapleStory background music!</p>
-            <p class="text-gray-600">Mobile audio currently not working.For best experience, use Desktop</p>
+            <p class="text-gray-600">Mobile audio now supported! Desktop uses YouTube, Mobile uses optimized audio.</p>
         </header>
 
         <!-- Game Setup Screen -->
@@ -1333,6 +1333,12 @@
                 `${gameModePrefix}${gameState.difficulty}_unlimited` : 
                 `${gameModePrefix}${gameState.difficulty}`;
             localStorage.setItem(`mapleBgmHighScore_${modeKey}`, gameState.highScores[modeKey].toString());
+        }
+
+        // Mobile device detection
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (window.innerWidth <= 768 && 'ontouchstart' in window);
         }
 
         // Helper functions for daily mode management
@@ -1831,7 +1837,19 @@
             }
             
             gameState.currentRound = 1;
-            gameState.currentAudioUrl = song.url;
+            
+            // Use blob storage URL for mobile, YouTube URL for desktop
+            if (isMobileDevice()) {
+                // Generate blob storage URL for mobile
+                const blobBaseUrl = 'https://s3ln8cylhjndvwrq.public.blob.vercel-storage.com/';
+                const fileName = `${encodeURIComponent(song.name)} - ${encodeURIComponent(song.regions.town)}.webm`;
+                gameState.currentAudioUrl = blobBaseUrl + fileName;
+                console.log('Using blob storage URL for mobile:', gameState.currentAudioUrl);
+            } else {
+                // Use YouTube URL for desktop
+                gameState.currentAudioUrl = song.url;
+                console.log('Using YouTube URL for desktop:', gameState.currentAudioUrl);
+            }
             
             // Update UI for new song
             if (gameState.isUnlimited) {
