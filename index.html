@@ -1418,8 +1418,16 @@
                     );
                 }
                 
+                console.log('Total songs loaded:', gameState.songs.length);
                 console.log('Available oldschool songs:', availableSongs.length);
                 console.log('Seed:', seed);
+                console.log('First few oldschool songs:', availableSongs.slice(0, 3).map(s => s.name));
+                
+                // Critical check: if no oldschool songs found, return error
+                if (availableSongs.length === 0) {
+                    console.error('No oldschool songs found! Cannot generate daily game.');
+                    return null;
+                }
                 
                 // Select one song using seeded random with validation
                 let selectedSong = null;
@@ -1431,16 +1439,17 @@
                     const songIndex = Math.floor(random() * availableSongs.length);
                     const candidateSong = availableSongs[songIndex];
                     
-                    console.log('Attempt', attempts + 1, '- Song index:', songIndex, 'Candidate:', candidateSong);
+                    console.log('Attempt', attempts + 1, '- Song index:', songIndex, 'Array length:', availableSongs.length, 'Candidate:', candidateSong ? candidateSong.name : 'UNDEFINED');
                     
-                    // Validate song exists and has required properties
-                    if (candidateSong && candidateSong.url && candidateSong.name) {
+                    // Additional validation for array bounds and song properties
+                    if (songIndex >= 0 && songIndex < availableSongs.length && candidateSong && candidateSong.url && candidateSong.name) {
                         selectedSong = candidateSong;
                         console.log('Selected song:', selectedSong.name);
                     } else {
                         // Try next random seed
                         attempts++;
                         random(); // advance the random generator
+                        console.log('Invalid candidate, advancing random generator');
                     }
                 }
                 
