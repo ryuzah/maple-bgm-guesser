@@ -1381,6 +1381,10 @@
             const today = getUTCToday();
             let data = gameState.dailyData[dailyKey];
             
+            console.log('getDailyGame called with:', dailyKey);
+            console.log('Today:', today);
+            console.log('Existing data:', data);
+            
             // Check if we need to clear old daily data due to seed version change
             // This forces regeneration of daily songs after metadata updates
             const currentSeedVersion = 'v2';
@@ -1408,6 +1412,9 @@
                     );
                 }
                 
+                console.log('Available oldschool songs:', availableSongs.length);
+                console.log('Seed:', seed);
+                
                 // Select one song using seeded random with validation
                 let selectedSong = null;
                 let attempts = 0;
@@ -1418,9 +1425,12 @@
                     const songIndex = Math.floor(random() * availableSongs.length);
                     const candidateSong = availableSongs[songIndex];
                     
+                    console.log('Attempt', attempts + 1, '- Song index:', songIndex, 'Candidate:', candidateSong);
+                    
                     // Validate song exists and has required properties
                     if (candidateSong && candidateSong.url && candidateSong.name) {
                         selectedSong = candidateSong;
+                        console.log('Selected song:', selectedSong.name);
                     } else {
                         // Try next random seed
                         attempts++;
@@ -1428,9 +1438,30 @@
                     }
                 }
                 
-                // Fallback: if no valid song found, pick first available song
+                // Fallback: if no valid song found, pick first available song with validation
                 if (!selectedSong && availableSongs.length > 0) {
-                    selectedSong = availableSongs[0];
+                    // Find first song with valid properties
+                    for (let i = 0; i < availableSongs.length; i++) {
+                        const candidateSong = availableSongs[i];
+                        if (candidateSong && candidateSong.url && candidateSong.name) {
+                            selectedSong = candidateSong;
+                            console.log('Fallback to first valid song:', selectedSong.name);
+                            break;
+                        }
+                    }
+                }
+                
+                console.log('Final selected song:', selectedSong ? selectedSong.name : 'NONE');
+                
+                // Final validation - if still no valid song, create a default one
+                if (!selectedSong) {
+                    console.error('No valid songs found! Creating default song.');
+                    selectedSong = {
+                        name: 'Unknown Song',
+                        regions: { town: 'Unknown' },
+                        url: 'https://www.youtube.com/watch?v=dummy',
+                        tags: ['oldschool']
+                    };
                 }
                 
                 // Create new data object for today
@@ -1646,11 +1677,29 @@
         }
 
         function startDailyGame(dailyKey) {
+            console.log('startDailyGame called with:', dailyKey);
             const dailyGame = getDailyGame(dailyKey);
+            console.log('Daily game result:', dailyGame);
+            
+            if (!dailyGame || !dailyGame.song) {
+                console.error('Daily game or song is missing!');
+                console.error('Daily game object:', dailyGame);
+                alert('Error: Daily game could not be generated. Please try again.');
+                return;
+            }
+            
+            // Validate the song has required properties
+            if (!dailyGame.song.name || !dailyGame.song.url) {
+                console.error('Daily song is missing required properties:', dailyGame.song);
+                alert('Error: Daily song data is incomplete. Please try again.');
+                return;
+            }
+            
             gameState.guessedSongs = [dailyGame.song];
             gameState.currentSongIndex = 0;
             gameState.currentRound = 1;
             gameState.score = 0;
+            console.log('Set up daily game with song:', dailyGame.song.name);
             
             // Update UI
             document.getElementById('setupScreen').classList.add('hidden');
