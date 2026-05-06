@@ -1964,8 +1964,12 @@
                 gameState.currentAudio = null;
             }
             
-            // Play audio - use currentAudioUrl which should be set correctly for mobile/desktop
-            playYouTubeAudio(gameState.currentAudioUrl, duration);
+            // Play audio - check if mobile and use blob storage directly
+            if (isMobileDevice()) {
+                playMobileAudioFallback(gameState.currentAudioUrl, duration);
+            } else {
+                playYouTubeAudio(gameState.currentAudioUrl, duration);
+            }
         }
 
         let youtubePlayer = null;
@@ -1979,15 +1983,20 @@
         }
 
         // Mobile audio using blob storage
-        function playMobileAudioFallback(youtubeUrl, duration) {
+        function playMobileAudioFallback(audioUrl, duration) {
             try {
-                // Extract song name and region from current song to construct blob storage URL
-                const song = gameState.guessedSongs[gameState.currentSongIndex];
-                
-                // Construct blob storage URL using proper URL encoding
-                const blobBaseUrl = 'https://s3ln8cylhjndvwrq.public.blob.vercel-storage.com/';
-                const fileName = `${encodeURIComponent(song.name)} - ${encodeURIComponent(song.regions.town)}.webm`;
-                const blobAudioUrl = blobBaseUrl + fileName;
+                // If we received a blob storage URL directly, use it
+                // Otherwise construct it from the song data
+                let blobAudioUrl;
+                if (audioUrl && audioUrl.includes('blob.vercel-storage.com')) {
+                    blobAudioUrl = audioUrl;
+                } else {
+                    // Extract song name and region from current song to construct blob storage URL
+                    const song = gameState.guessedSongs[gameState.currentSongIndex];
+                    const blobBaseUrl = 'https://s3ln8cylhjndvwrq.public.blob.vercel-storage.com/';
+                    const fileName = `${encodeURIComponent(song.name)} - ${encodeURIComponent(song.regions.town)}.webm`;
+                    blobAudioUrl = blobBaseUrl + fileName;
+                }
                 
                 showFeedback('Loading audio...', 'info');
                 
@@ -2000,13 +2009,13 @@
                         console.error('Blob storage audio failed:', error);
                         showFeedback('Audio failed, trying YouTube...', 'warning');
                         // Fallback to YouTube if blob storage fails
-                        playYouTubeAudioDesktop(youtubeUrl, duration);
+                        playYouTubeAudioDesktop(gameState.guessedSongs[gameState.currentSongIndex].url, duration);
                     });
                     
             } catch (error) {
                 console.error('Mobile audio fallback error:', error);
                 showFeedback('Mobile audio failed, trying YouTube...', 'warning');
-                playYouTubeAudioDesktop(youtubeUrl, duration);
+                playYouTubeAudioDesktop(gameState.guessedSongs[gameState.currentSongIndex].url, duration);
             }
         }
 
